@@ -7,3 +7,7 @@ export interface Image {
   version: number;
   quality: number; // 1-100 scale
 }
+
+export interface Node {
+  
+}
