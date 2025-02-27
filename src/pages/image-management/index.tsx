@@ -47,7 +47,7 @@ export const mockTreeData: any = [
 ];
 
 // 'Name', 'Date Added', 'Folders', 'Captions', 'Version', 'Quality', 'Actions'
-const mockTableData: any = [
+export const mockTableData: any = [
   { id: 1, name: 'Product A', quality: 2, version: 'v1.1', captions: true, 'Date Added': Date(), folders: ['Test'] },
   { id: 2, name: 'Product B', quality: 1, version: '', captions: false, 'Date Added': Date(), folders: [] },
   { id: 3, name: 'Product C', quality: 4, version: '', captions: true, 'Date Added': Date(), folders: [] },

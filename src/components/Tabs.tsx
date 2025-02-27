@@ -16,7 +16,7 @@ export const Tabs: FC<TabsProps> = ({ tabs = [], currentTab = '', onSelect, clas
           <li
             key={index}
             className={classNames(
-              'flex-1 text-muted_foreground font-medium text-sm py-1.5 px-3 rounded-sm transition-all duration-300',
+              'flex-1 text-muted_foreground font-medium text-sm whitespace-nowrap py-1.5 px-3 rounded-sm transition-all duration-300',
               currentTab === tab ? '!text-black bg-white' : ''
             )}
           >

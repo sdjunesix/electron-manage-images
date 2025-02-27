@@ -27,7 +27,7 @@ export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns
           <tr>
             {columns.map((col: any, index: number) => {
               return (
-                <th key={index} scope="col" className="cursor-pointer px-4 py-2.5 text-muted_foreground hover:bg-muted capitalize">
+                <th key={index} scope="col" className="cursor-pointer px-4 py-2.5 text-muted_foreground hover:bg-muted capitalize rounded-t-lg">
                   {col}
                 </th>
               );
@@ -40,12 +40,12 @@ export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns
             return (
               <tr key={index} className="bg-white cursor-pointer border-t border-line hover:bg-muted_50">
                 {columns.map((col: any, idx: number) => (
-                  <td key={idx} className="px-4 py-2">
+                  <td key={idx} className="px-4 py-2 rounded-bl-lg">
                     {formatters[col] ? formatters[col](row[col]) : row[col]}
                   </td>
                 ))}
                 {actions.length > 0 && (
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 rounded-br-lg">
                     {actions.length === 1 ? (
                       <button
                         className="px-2.5 h-8 rounded-md hover:bg-accent hover:text-white flex items-center justify-center space-x-2"
@@ -55,7 +55,7 @@ export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns
                         {actions[0].label && <span>{actions[0].label}</span>}
                       </button>
                     ) : (
-                      <Dropdown actions={actions} row={row} />
+                      <Dropdown actions={actions} value={row} />
                     )}
                   </td>
                 )}

@@ -16,7 +16,7 @@ export const ButtonPrimary: FC<ButtonProps> = ({ type = 'button', children, onCl
       onClick={onClick}
       disabled={disabled}
       className={classNames(
-        'text-sm px-4 py-2 rounded-md hover:bg-accent_50 transition bg-accent text-white',
+        'text-sm px-4 py-2 rounded-md hover:bg-accent_50 transition bg-accent text-white whitespace-nowrap',
         'disabled:bg-gray-400 disabled:cursor-not-allowed',
         'flex items-center space-x-2',
         (className = '')
@@ -34,7 +34,7 @@ export const ButtonOutline: FC<ButtonProps> = ({ type = 'button', children, onCl
       onClick={onClick}
       disabled={disabled}
       className={classNames(
-        'text-sm px-4 py-2 rounded-md hover:bg-accent_50 transition bg-white text-black',
+        'text-sm px-4 py-2 rounded-md hover:bg-accent_50 transition bg-white text-black whitespace-nowrap',
         'disabled:bg-white disabled:text-gray-400 disabled:cursor-not-allowed',
         'border border-line hover:text-white',
         className

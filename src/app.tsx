@@ -3,7 +3,7 @@ import { HashRouter, Routes, Route, NavLink, Link } from 'react-router-dom';
 
 import { Image } from './models';
 
-import { ROUTES } from './constants/routes';
+import { ROUTES } from '@constants';
 
 declare global {
   interface Window {

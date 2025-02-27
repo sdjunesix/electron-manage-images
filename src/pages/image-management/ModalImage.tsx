@@ -19,7 +19,7 @@ export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose }) => {
           <Input />
           <ImageView src={`https://preview--imaginerix-flow.lovable.app/captions`} />
           <div>
-            <Label children="Quality Rating" />
+            <Label children="Quality Rating" className='bg-muted' />
             <Rating maxStars={5} value={star} size={7} onChange={setStar} />
           </div>
         </div>

@@ -1,15 +1,15 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import { Action, RowData } from './Table';
+import { Action } from './Table';
 
 type DropdownProps = {
   actions: Action[];
-  row: RowData;
+  value: any;
   position?: 'top' | 'bottom' | 'left' | 'right';
 };
 
-export const Dropdown: FC<DropdownProps> = ({ actions, row, position = 'bottom' }) => {
-  const dropdownRef = useRef(null);
+export const Dropdown: FC<DropdownProps> = ({ actions, value, position = 'bottom' }) => {
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export const Dropdown: FC<DropdownProps> = ({ actions, row, position = 'bottom' 
               type="button"
               className="px-2.5 py-1 w-full hover:bg-accent hover:text-white flex items-center space-x-2"
               onClick={() => {
-                action.onClick(row);
+                action.onClick(value);
                 setOpen(false);
               }}
             >
