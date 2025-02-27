@@ -1,10 +1,12 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { FaPencil, FaCheck } from 'react-icons/fa6';
 import { FaPlus } from 'react-icons/fa';
 import { Tabs, Tree, Table, ImageView, Rating, Tag, Input, ButtonPrimary } from '@components';
 import { ModalImage } from './ModalImage';
 import { classNames } from '@utils';
+import { Image } from '@models/index';
+import ImageCard from './ImageCard';
 
 export const mockTreeData: any = [
   {
@@ -56,6 +58,16 @@ export const ImageManagementPage: FC = () => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [images, setImages] = useState([])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await window.electron.listImages();
+      setImages(data);
+    };
+    fetchData();
+  }, [])
+
   return (
     <div className="p-5">
       <Tabs tabs={['Images', 'Grid', 'Folders']} currentTab={selectedTab} onSelect={setSelectedTab} />
@@ -84,7 +96,7 @@ export const ImageManagementPage: FC = () => {
               Showing <span className="text-black">6</span> images
             </p>
             <Table
-              rows={mockTableData}
+              rows={images}
               hiddenColumns={['id']}
               formatters={{
                 'Date Added': (value: any) => dayjs(value).format('D/M/YYYY'),
@@ -117,126 +129,16 @@ export const ImageManagementPage: FC = () => {
               <span className="py-1 px-2 text-muted_foreground bg-muted/50 rounded-lg">20</span>
             </p>
             <div className="grid grid-cols-4 gap-4">
-              <div className="relative group cursor-pointer">
-                <ImageView src="/images/image-1.jpg" />
-                <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <h3 className="font-medium">This is title</h3>
-                  <p className="flex items-center space-x-2">
-                    <Tag value="Tag 1" className="bg-white/20 border-none" />
-                    <Tag value="Tag 2" className="bg-white/20 border-none" />
-                  </p>
-                  <p className="flex items-center space-x-2">
-                    <FaCheck className="text-green-500" />
-                    <Tag value="v1.3" />
-                  </p>
-                  <Rating value={4} notHover size={4} />
-                </div>
-              </div>
-              <div className="relative group cursor-pointer">
-                <ImageView src="/images/image-2.jpg" />
-                <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <h3 className="font-medium">This is title</h3>
-                  <p className="flex items-center space-x-2">
-                    <Tag value="Tag 1" className="bg-white/20 border-none" />
-                    <Tag value="Tag 2" className="bg-white/20 border-none" />
-                  </p>
-                  <p className="flex items-center space-x-2">
-                    <FaCheck className="text-green-500" />
-                    <Tag value="v1.3" />
-                  </p>
-                  <Rating value={4} notHover size={4} />
-                </div>
-              </div>
-              <div className="relative group cursor-pointer">
-                <ImageView src="/images/image-3.jpg" />
-                <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <h3 className="font-medium">This is title</h3>
-                  <p className="flex items-center space-x-2">
-                    <Tag value="Tag 1" className="bg-white/20 border-none" />
-                    <Tag value="Tag 2" className="bg-white/20 border-none" />
-                  </p>
-                  <p className="flex items-center space-x-2">
-                    <FaCheck className="text-green-500" />
-                    <Tag value="v1.3" />
-                  </p>
-                  <Rating value={4} notHover size={4} />
-                </div>
-              </div>
-              <div className="relative group cursor-pointer">
-                <ImageView src="/images/image-1.jpg" />
-                <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <h3 className="font-medium">This is title</h3>
-                  <p className="flex items-center space-x-2">
-                    <Tag value="Tag 1" className="bg-white/20 border-none" />
-                    <Tag value="Tag 2" className="bg-white/20 border-none" />
-                  </p>
-                  <p className="flex items-center space-x-2">
-                    <FaCheck className="text-green-500" />
-                    <Tag value="v1.3" />
-                  </p>
-                  <Rating value={4} notHover size={4} />
-                </div>
-              </div>
-              <div className="relative group cursor-pointer">
-                <ImageView src="/images/image-1.jpg" />
-                <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <h3 className="font-medium">This is title</h3>
-                  <p className="flex items-center space-x-2">
-                    <Tag value="Tag 1" className="bg-white/20 border-none" />
-                    <Tag value="Tag 2" className="bg-white/20 border-none" />
-                  </p>
-                  <p className="flex items-center space-x-2">
-                    <FaCheck className="text-green-500" />
-                    <Tag value="v1.3" />
-                  </p>
-                  <Rating value={4} notHover size={4} />
-                </div>
-              </div>
-              <div className="relative group cursor-pointer">
-                <ImageView src="/images/image-2.jpg" />
-                <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <h3 className="font-medium">This is title</h3>
-                  <p className="flex items-center space-x-2">
-                    <Tag value="Tag 1" className="bg-white/20 border-none" />
-                    <Tag value="Tag 2" className="bg-white/20 border-none" />
-                  </p>
-                  <p className="flex items-center space-x-2">
-                    <FaCheck className="text-green-500" />
-                    <Tag value="v1.3" />
-                  </p>
-                  <Rating value={4} notHover size={4} />
-                </div>
-              </div>
-              <div className="relative group cursor-pointer">
-                <ImageView src="/images/image-3.jpg" />
-                <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <h3 className="font-medium">This is title</h3>
-                  <p className="flex items-center space-x-2">
-                    <Tag value="Tag 1" className="bg-white/20 border-none" />
-                    <Tag value="Tag 2" className="bg-white/20 border-none" />
-                  </p>
-                  <p className="flex items-center space-x-2">
-                    <FaCheck className="text-green-500" />
-                    <Tag value="v1.3" />
-                  </p>
-                  <Rating value={4} notHover size={4} />
-                </div>
-              </div>
-              <div className="relative group cursor-pointer">
-                <ImageView src="/images/image-1.jpg" />
-                <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-                  <h3 className="font-medium">This is title</h3>
-                  <p className="flex items-center space-x-2">
-                    <Tag value="Tag 1" className="bg-white/20 border-none" />
-                    <Tag value="Tag 2" className="bg-white/20 border-none" />
-                  </p>
-                  <p className="flex items-center space-x-2">
-                    <FaCheck className="text-green-500" />
-                    <Tag value="v1.3" />
-                  </p>
-                  <Rating value={4} notHover size={4} />
-                </div>
-              </div>
+              {images.map((image: any) => (
+                <ImageCard
+                  key={image.id}
+                  src={image.src}
+                  title={image.title}
+                  tags={image.tags}
+                  version={image.version}
+                  rating={image.rating}
+                />
+              ))}
             </div>
           </div>
         )}
