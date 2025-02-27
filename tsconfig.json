@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "react-jsx",
     "target": "ESNext",
     "module": "commonjs",
     "allowJs": true,
@@ -11,6 +11,14 @@
     "baseUrl": ".",
     "outDir": "dist",
     "moduleResolution": "node",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@": ["src"],
+      "@components": ["src/components/index.ts"],
+      "@constants/*": ["src/components/*"],
+      "@models/*": ["src/models/*"],
+      "@pages/*": ["src/pages/*"],
+      "@utils": ["src/utils/index.ts"],
+    }
   }
 }

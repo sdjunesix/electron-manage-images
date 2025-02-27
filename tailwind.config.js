@@ -1,4 +1,5 @@
 const flowbite = require("flowbite-react/tailwind");
+
 module.exports = {
     content: [
       "./index.html", 
@@ -6,7 +7,20 @@ module.exports = {
       flowbite.content(),
     ],
     theme: {
-      extend: {},
+      extend: {
+        colors: {
+          muted_foreground: '#727272',
+        },
+        borderColor: {
+          line: '#E5E5E5',
+        },
+        backgroundColor: {
+          muted: '#F5F5F5',
+          muted_50: '#F5F5F580',
+          accent: '#9785eb',
+          accent_50: '#9785eb80',
+        },
+      },
     },
     plugins: [
       flowbite.plugin(),
