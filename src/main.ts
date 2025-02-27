@@ -4,12 +4,21 @@ import fs from 'fs';
 import started from 'electron-squirrel-startup';
 import { Image, Node } from './models';
 const sqlite3 = require('sqlite3').verbose();
+import Datastore from 'nedb'; 
 
 let db = new sqlite3.Database(`${process.cwd()}/src/sqlite3.db`, (err: string) => {
   if (err) {
     console.error('Error opening database:', err);
   }
 });
+
+
+// Initialize database (file-based storage)
+const nedb = new Datastore({
+  filename: `${process.cwd()}/src/nedb/db.json`, // Stores data in 'data.db'
+  autoload: true, // Automatically loads the database on startup
+});
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
