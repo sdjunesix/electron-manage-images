@@ -16,13 +16,16 @@ import {
 import { optionsAPI, optionsVersion } from '@constants';
 import { mockTableData } from '@pages/image-management';
 import dayjs from 'dayjs';
-import { FaPencil } from 'react-icons/fa6';
+import { FaPencil, FaPlus } from 'react-icons/fa6';
+import { DropdownFolder } from './DropdownFolder';
+import { ModalAddCaption } from './ModalAddCaption';
 
 export const CaptionManagementPage: FC = () => {
   const [selectedTab, setSelectedTab] = useState('Images');
   const [selectedOptionVersion, setSelectedVersion] = useState(optionsVersion[0]);
   const [selectedOptionApi, setSelectedOptionApi] = useState(null);
   const [selectedTabVersion, setSelectedTabVersion] = useState('V1.0');
+  const [openAddCaption, setOpenAddCaption] = useState(false);
 
   return (
     <div className="p-5 space-y-4">
@@ -31,12 +34,10 @@ export const CaptionManagementPage: FC = () => {
       {selectedTab === 'Images' && (
         <>
           <div className="flex items-center justify-between">
-            <ButtonOutline className="text-xl" onClick={() => {}}>
-              <FiFolder />
-            </ButtonOutline>
+            <DropdownFolder />
             <div className="flex items-center space-x-2">
               <SingleSelect options={optionsVersion} value={selectedOptionVersion} onChange={setSelectedVersion} className="w-32" />
-              <ButtonPrimary onClick={() => {}}>Add Caption</ButtonPrimary>
+              <ButtonPrimary onClick={() => setOpenAddCaption(!openAddCaption)}>Add Caption</ButtonPrimary>
             </div>
           </div>
           <div className="border border-line rounded-lg">
@@ -95,6 +96,10 @@ export const CaptionManagementPage: FC = () => {
               <Label children="Prompt" />
               <Textarea placeholder="Enter prompt text" rows={4} />
             </div>
+            <ButtonPrimary onClick={() => {}} className="w-full">
+              <FaPlus />
+              <span>Add Prompt</span>
+            </ButtonPrimary>
           </div>
           <h1 className="text-lg font-medium">Version History</h1>
           <div className="border border-line rounded-lg p-4">
@@ -155,6 +160,7 @@ export const CaptionManagementPage: FC = () => {
           </div>
         </div>
       )}
+      <ModalAddCaption isOpen={openAddCaption} onClose={setOpenAddCaption} />
     </div>
   );
 };

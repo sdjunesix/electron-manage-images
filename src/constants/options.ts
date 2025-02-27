@@ -37,3 +37,34 @@ export const optionsAPI: Option[] = [
     value: 'other',
   },
 ];
+
+export const optionsFolder: Option[] = [
+  {
+    label: 'Main Folder',
+    value: 'main',
+  },
+  {
+    label: 'Folder test 1',
+    value: '1',
+  },
+  {
+    label: 'Folder test 2',
+    value: '2',
+  },
+  {
+    label: 'Folder test 3',
+    value: '4',
+  },
+  {
+    label: 'Folder test 4',
+    value: '4',
+  },
+  {
+    label: 'Folder test 5',
+    value: '5',
+  },
+  {
+    label: 'Folder test 6',
+    value: '6',
+  },
+];
