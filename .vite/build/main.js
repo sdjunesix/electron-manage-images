@@ -4800,6 +4800,39 @@ let db = new sqlite3.Database(`${process.cwd()}/src/sqlite3.db`, (err) => {
     console.error("Error opening database:", err);
   }
 });
+function getById(obj, targetId) {
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      const result = getById(item, targetId);
+      if (result) return result;
+    }
+  } else if (typeof obj === "object" && obj !== null) {
+    if (obj.id === targetId) return obj;
+    return getById(obj.children, targetId);
+  }
+  return null;
+}
+function getImages(node2) {
+  let images = [];
+  if (node2.type === "image") {
+    images.push(node2);
+  }
+  if (node2.children && Array.isArray(node2.children)) {
+    for (const child of node2.children) {
+      images = images.concat(getImages(child));
+    }
+  }
+  return images;
+}
+function getFolders(node2) {
+  if (node2.type !== "folder" && node2.type !== "root") {
+    return null;
+  }
+  return {
+    ...node2,
+    children: node2.children ? node2.children.map(getFolders).filter(Boolean) : []
+  };
+}
 new Datastore$1({
   filename: `${process.cwd()}/src/nedb/db.json`,
   // Stores data in 'data.db'
@@ -4859,18 +4892,6 @@ const createWindow = () => {
           reject(err);
         } else {
           resolve({ success: true });
-        }
-      });
-    });
-  });
-  require$$3$1.ipcMain.handle("get-image-by-id", async (_2, id) => {
-    return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM images WHERE id = ?`;
-      db.get(query, [id], (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row);
         }
       });
     });
@@ -5043,6 +5064,43 @@ const createWindow = () => {
       });
     });
   }
+  require$$3$1.ipcMain.handle("update-tree", async (_2, obj, targetId, action, payload) => {
+    return new Promise((resolve, reject) => {
+    });
+  });
+  require$$3$1.ipcMain.handle("get-images", async () => {
+    return new Promise((resolve, reject) => {
+      db.findOne({ id: "root" }, (err, root) => {
+        if (err || !root) reject(new Error("Root not found"));
+        else {
+          const images = getImages(root);
+          resolve(images);
+        }
+      });
+    });
+  });
+  require$$3$1.ipcMain.handle("get-image-by-id", async (_2, imageId) => {
+    return new Promise((resolve, reject) => {
+      db.findOne({ id: "root" }, (err, root) => {
+        if (err || !root) reject(new Error("Root not found"));
+        else {
+          const images = getById(root, imageId);
+          resolve(images);
+        }
+      });
+    });
+  });
+  require$$3$1.ipcMain.handle("get-folders", async () => {
+    return new Promise((resolve, reject) => {
+      db.findOne({ id: "root" }, (err, root) => {
+        if (err || !root) reject(new Error("Root not found"));
+        else {
+          const images = getFolders(root);
+          resolve(images);
+        }
+      });
+    });
+  });
   mainWindow.webContents.openDevTools();
 };
 require$$3$1.app.on("ready", createWindow);

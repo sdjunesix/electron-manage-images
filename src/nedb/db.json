@@ -38,7 +38,7 @@
             "name": "Iterator",
             "children": [
                 {
-                    "id": "",
+                    "id": "child-folder-1",
                     "type": "folder",
                     "path": "/Users/sdjune6/ws/electron-manage-images",
                     "name": "Rooms",

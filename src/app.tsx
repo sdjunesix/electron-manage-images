@@ -12,7 +12,7 @@ declare global {
       selectFiles: () => Promise<string[]>;
       moveFiles: (files: string[], rootFolder: string) => Promise<{ success: boolean; movedFiles?: string[]; error?: string }>;
       createImage: (image: Image) => Promise<{ success: boolean }>;
-      getImageById: (id: string) => Promise<Image>;
+      // getImageById: (id: string) => Promise<Image>;
       updateImage: (image: Image) => Promise<{ success: boolean }>;
       deleteImage: (id: string) => Promise<{ success: boolean }>;
       listImages: () => Promise<Image[]>;
@@ -21,6 +21,12 @@ declare global {
       updateVersion: (imageId: string, newVersion: number) => Promise<{ success: boolean }>;
       updateFolder: (imageId: string, newFolder: string) => Promise<{ success: boolean }>;
       getImageDetailsWithVersions: (imageId: string) => Promise<any>;
+
+      updateTree: (obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => Promise<any>;
+      getImages: () => Promise<any>;
+      getImageById: (imageId: string) => Promise<any>;
+      getFolders: () => Promise<any>;
+      updateImageQuality: (obj: any, targetId: string, newObject: any) => Promise<any>;
     };
   }
 }

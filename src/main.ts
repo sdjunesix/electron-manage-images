@@ -12,6 +12,99 @@ let db = new sqlite3.Database(`${process.cwd()}/src/sqlite3.db`, (err: string) =
   }
 });
 
+function addObject(obj: any, targetId: string, newObject: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => addObject(item, targetId, newObject));
+  } else if (typeof obj === "object" && obj !== null) {
+    if (obj.id === targetId && obj.type === "folder") {
+      return { ...obj, children: [...obj.children, newObject] };
+    }
+    return { ...obj, children: addObject(obj.children, targetId, newObject) };
+  }
+  return obj;
+}
+
+function deleteById(obj: any, targetId: string): any {
+  if (Array.isArray(obj)) {
+    return obj.filter(item => item.id !== targetId).map(item => deleteById(item, targetId));
+  } else if (typeof obj === "object" && obj !== null) {
+    return { ...obj, children: deleteById(obj.children, targetId) };
+  }
+  return obj;
+}
+
+function updateById(obj: any, targetId: string, updates: Partial<any>): any {
+  if (Array.isArray(obj)) {
+    return obj.map(item => updateById(item, targetId, updates));
+  } else if (typeof obj === "object" && obj !== null) {
+    if (obj.id === targetId) {
+      return { ...obj, ...updates };
+    }
+    return { ...obj, children: updateById(obj.children, targetId, updates) };
+  }
+  return obj;
+}
+
+function getById(obj: any, targetId: string): any | null {
+  if (Array.isArray(obj)) {
+    for (const item of obj) {
+      const result = getById(item, targetId);
+      if (result) return result;
+    }
+  } else if (typeof obj === "object" && obj !== null) {
+    if (obj.id === targetId) return obj;
+    return getById(obj.children, targetId);
+  }
+  return null;
+}
+
+function getImages(node: any): any[] {
+  let images: any[] = [];
+
+  if (node.type === "image") {
+      images.push(node);
+  }
+
+  if (node.children && Array.isArray(node.children)) {
+      for (const child of node.children) {
+          images = images.concat(getImages(child));
+      }
+  }
+  return images;
+}
+
+
+function getFolders(node: any): any[] {
+  if (node.type !== "folder" && node.type !== "root") {
+    return null; // Exclude non-folder nodes
+  }
+
+  return {
+    ...node,
+    children: node.children
+        ? node.children.map(getFolders).filter(Boolean) // Recursively filter children
+        : []
+  };
+}
+
+
+function updateTree(obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any): any {
+  if (Array.isArray(obj)) {
+    if (action === "delete") {
+      return obj.filter(item => item.id !== targetId).map(item => updateTree(item, targetId, action, payload));
+    }
+    return obj.map(item => updateTree(item, targetId, action, payload));
+  } else if (typeof obj === "object" && obj !== null) {
+    if (obj.id === targetId) {
+      if (action === "update") return { ...obj, ...payload };
+      if (action === "add") return { ...obj, children: [...obj.children, payload] };
+    }
+    return { ...obj, children: updateTree(obj.children, targetId, action, payload) };
+  }
+  return obj;
+}
+
+
 
 // Initialize database (file-based storage)
 const nedb = new Datastore({
@@ -97,18 +190,18 @@ const createWindow = () => {
   });
 
   // Get Image by ID
-  ipcMain.handle('get-image-by-id', async (_, id: string) => {
-    return new Promise((resolve, reject) => {
-      const query = `SELECT * FROM images WHERE id = ?`;
-      db.get(query, [id], (err: any, row: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row);
-        }
-      });
-    });
-  });
+  // ipcMain.handle('get-image-by-id', async (_, id: string) => {
+  //   return new Promise((resolve, reject) => {
+  //     const query = `SELECT * FROM images WHERE id = ?`;
+  //     db.get(query, [id], (err: any, row: any) => {
+  //       if (err) {
+  //         reject(err);
+  //       } else {
+  //         resolve(row);
+  //       }
+  //     });
+  //   });
+  // });
 
   // Update Image
   ipcMain.handle('update-image', async (_, image: Image) => {
@@ -301,6 +394,85 @@ const createWindow = () => {
       });
     });
   }
+
+  // Create Image
+  ipcMain.handle('update-tree', async (_, obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => {
+    return new Promise((resolve, reject) => {
+      
+    });
+  });
+
+  ipcMain.handle('get-images', async () => {
+    return new Promise((resolve, reject) => {
+        db.findOne({ id: "root" }, (err: any, root: unknown) => {
+            if (err || !root) reject(new Error("Root not found"));
+            else {
+              const images = getImages(root)
+              resolve(images)
+            };
+        });
+    });
+  });
+
+  ipcMain.handle('get-image-by-id', async (_, imageId: string) => {
+    return new Promise((resolve, reject) => {
+        db.findOne({ id: "root" }, (err: any, root: unknown) => {
+            if (err || !root) reject(new Error("Root not found"));
+            else {
+              const images = getById(root, imageId)
+              resolve(images)
+            };
+        });
+    });
+  });
+
+  ipcMain.handle('get-folders', async () => {
+    return new Promise((resolve, reject) => {
+        db.findOne({ id: "root" }, (err: any, root: unknown) => {
+            if (err || !root) reject(new Error("Root not found"));
+            else {
+              const images = getFolders(root)
+              resolve(images)
+            };
+        });
+    });
+  });
+
+  ipcMain.handle('update-image-quality', async (_, obj: any, targetId: string, action: "update", payload?: any) => {
+    return new Promise((resolve, reject) => {
+      db.findOne({ id: "root" }, (err: any, root: unknown) => {
+        if (err || !root) reject(new Error("Root not found"));
+        else {
+          const images = updateTree(root, targetId, action, payload)
+          resolve(images)
+        };
+      });
+    });
+  });
+
+  ipcMain.handle('update-image-caption', async (_, obj: any, targetId: string, action: "update", payload?: any) => {
+    return new Promise((resolve, reject) => {
+      db.findOne({ id: "root" }, (err: any, root: unknown) => {
+        if (err || !root) reject(new Error("Root not found"));
+        else {
+          const images = updateTree(root, targetId, action, payload)
+          resolve(images)
+        };
+      });
+    });
+  });
+
+  ipcMain.handle('update-image-version', async (_, obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => {
+    return new Promise((resolve, reject) => {
+      db.findOne({ id: "root" }, (err: any, root: unknown) => {
+        if (err || !root) reject(new Error("Root not found"));
+        else {
+          const images = updateTree(root, targetId, action, payload)
+          resolve(images)
+        };
+      });
+    });
+  });
 
   mainWindow.webContents.openDevTools();
 };
