@@ -13,6 +13,7 @@ export default defineConfig({
       '@constants': path.resolve(__dirname, 'src/constants'),
       '@models': path.resolve(__dirname, 'src/models'),
       '@pages': path.resolve(__dirname, 'src/pages'),
+      '@services': path.resolve(__dirname, 'src/services/index.ts'),
       '@utils': path.resolve(__dirname, 'src/utils/index.ts'),
     },
   },

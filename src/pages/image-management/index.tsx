@@ -1,12 +1,12 @@
 import { FC, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { FaPencil, FaCheck } from 'react-icons/fa6';
+import { FaPencil } from 'react-icons/fa6';
 import { FaPlus } from 'react-icons/fa';
-import { Tabs, Tree, Table, ImageView, Rating, Tag, Input, ButtonPrimary } from '@components';
+import { Tabs, Tree, Table, Rating, Tag, Input, ButtonPrimary } from '@components';
 import { ModalImage } from './ModalImage';
 import { classNames } from '@utils';
-import { Image } from '@models/index';
 import ImageCard from './ImageCard';
+import { selectFiles, selectFolder } from '@services';
 
 export const mockTreeData: any = [
   {
@@ -54,11 +54,25 @@ const mockTableData: any = [
 ];
 
 export const ImageManagementPage: FC = () => {
+  const [rootFolder, setRootFolder] = useState<string | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [selectedTab, setSelectedTab] = useState('Images');
   const [selectedNode, setSelectedNode] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [images, setImages] = useState([]);
 
-  const [images, setImages] = useState([])
+  const handleSelectFolder = async () => {
+    const path = await selectFolder();
+    if (path) {
+      setRootFolder(path);
+    }
+  };
+
+  const handleSelectFiles = async () => {
+    const files = await selectFiles();
+    setSelectedFiles(files);
+    console.log(files)
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,18 +80,31 @@ export const ImageManagementPage: FC = () => {
       setImages(data);
     };
     fetchData();
-  }, [])
+  }, []);
 
   return (
     <div className="p-5">
-      <Tabs tabs={['Images', 'Grid', 'Folders']} currentTab={selectedTab} onSelect={setSelectedTab} />
+      <div className="flex items-center justify-between">
+        <Tabs tabs={['Images', 'Grid', 'Folders']} currentTab={selectedTab} onSelect={setSelectedTab} />
+        <div className='flex space-x-2'>
+          <ButtonPrimary onClick={handleSelectFolder}>
+            <FaPlus />
+            <span>Add Root Folder</span>
+          </ButtonPrimary>
+          <ButtonPrimary onClick={handleSelectFiles}>
+            <FaPlus />
+            <span>Add Images</span>
+          </ButtonPrimary>
+        </div>
+      </div>
+      <p className={classNames('py-1 text-right truncate', rootFolder ? 'opacity-100' : 'opacity-0')}>Root folder: <strong>{rootFolder}</strong></p>
       <div className={classNames('', selectedTab === 'Folders' ? '' : 'mt-6 flex')}>
         {selectedTab === 'Folders' && (
           <div className="flex-1 flex items-center justify-between py-2">
             <h1 className="text-balance font-semibold">Folder Structure</h1>
             <div className="flex items-center space-x-2">
               <Input />
-              <ButtonPrimary disabled={false}>
+              <ButtonPrimary disabled={true}>
                 <FaPlus />
                 <span>Add Folder</span>
               </ButtonPrimary>
@@ -96,7 +123,7 @@ export const ImageManagementPage: FC = () => {
               Showing <span className="text-black">6</span> images
             </p>
             <Table
-              rows={images}
+              rows={mockTableData}
               hiddenColumns={['id']}
               formatters={{
                 'Date Added': (value: any) => dayjs(value).format('D/M/YYYY'),
@@ -104,8 +131,8 @@ export const ImageManagementPage: FC = () => {
                 folders: (values: any) => {
                   if (!!values?.length) {
                     return values?.map((item: any, index: number) => (
-                      <div className='flex space-x-1'>
-                      <Tag key={index} value={item} className="bg-muted border-none" />
+                      <div className="flex space-x-1">
+                        <Tag key={index} value={item} className="bg-muted border-none" />
                       </div>
                     ));
                   }
