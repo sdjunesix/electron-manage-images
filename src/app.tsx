@@ -82,15 +82,6 @@ const App = () => {
     // setTreeData({ assigned: assignedTree, unassigned: unassignedTree });
   }, [unassigned, assigned]);
 
-  const handleSelectFolder = async () => {
-    const folder = await window.electron.selectFolder();
-    if (folder) setRootFolder(folder);
-  };
-  const handleSelectFiles = async () => {
-    const files = await window.electron.selectFiles();
-    setSelectedFiles(files);
-  };
-
   const handleMoveFiles = async () => {
     console.log('ROOT FOLDER', rootFolder);
     console.log('FILES', selectedFiles);
