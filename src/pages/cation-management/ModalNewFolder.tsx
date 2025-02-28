@@ -12,15 +12,15 @@ export const ModalNewFolder: FC<ModalNewFolderProps> = ({ isOpen, onClose }) => 
 
   return (
     <Modal isOpen={isOpen} onClose={() => onClose(false)} title="Add New Folder" className="w-[300px]">
-      <div className='mt-4'>
+      <div className="mt-4">
         <Label children="Parent Folder (Optional)" />
         <SingleSelect options={optionsFolder} value={selectedOptionFolder} onChange={setSelectedOptionFolder} className="w-full" />
       </div>
-      <div className='mt-4'>
+      <div className="mt-4">
         <Label children="Folder Name" />
         <Input placeholder="Enter folder name" />
       </div>
-      <ButtonPrimary className='w-full mt-4'>Save Changes</ButtonPrimary>
+      <ButtonPrimary className="w-full mt-4">Save Changes</ButtonPrimary>
     </Modal>
   );
 };

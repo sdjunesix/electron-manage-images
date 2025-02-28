@@ -22,7 +22,7 @@ export const DropdownFolder: FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  
+
   return (
     <div ref={dropdownFolderRef} className="relative w-fit">
       <ButtonOutline className="text-xl" onClick={() => setOpen(!open)}>

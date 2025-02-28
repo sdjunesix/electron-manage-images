@@ -1,7 +1,5 @@
 import { FC, useState } from 'react';
-import { FiFolder } from 'react-icons/fi';
 import {
-  ButtonOutline,
   ButtonPrimary,
   Input,
   Label,
