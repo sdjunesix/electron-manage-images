@@ -60,6 +60,7 @@ export const ImageManagementPage: FC = () => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [images, setImages] = useState([]);
+  const [folders, setFolders] = useState([]);
 
   const handleSelectFolder = async () => {
     const path = await selectFolder();
@@ -75,9 +76,25 @@ export const ImageManagementPage: FC = () => {
   };
 
   useEffect(() => {
+    console.log('useEffect triggered');
     const fetchData = async () => {
-      const data = await window.electron.listImages();
-      setImages(data);
+      console.log('fetchData called');
+      try {
+        // Use Promise.all to fetch images and folders concurrently
+        const [dataImages1, dataFolders] = await Promise.all([
+          window.electron.listImages(),
+          // window.electron.getImages(),
+          window.electron.getFolders(),
+        ]);
+
+        console.log('LIST IMAGE', dataImages1);
+        // console.log('DATA IMAGES ', dataImages);
+        console.log('DATA FOLDES ', dataFolders);
+        // setImages(dataImages);
+        setFolders(dataFolders);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
     fetchData();
   }, []);
@@ -112,7 +129,7 @@ export const ImageManagementPage: FC = () => {
           </div>
         )}
         <Tree
-          nodes={mockTreeData}
+          nodes={folders}
           currentNode={selectedNode}
           onSelect={setSelectedNode}
           className={classNames('', selectedTab === 'Folders' ? '' : 'min-w-60')}
@@ -123,7 +140,7 @@ export const ImageManagementPage: FC = () => {
               Showing <span className="text-black">6</span> images
             </p>
             <Table
-              rows={mockTableData}
+              rows={images}
               hiddenColumns={['id']}
               formatters={{
                 'Date Added': (value: any) => dayjs(value).format('D/M/YYYY'),

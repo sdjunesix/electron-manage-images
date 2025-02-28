@@ -5,6 +5,30 @@ import started from 'electron-squirrel-startup';
 import { Image, Node } from './models';
 const sqlite3 = require('sqlite3').verbose();
 import Datastore from 'nedb'; 
+// import lowdb from 'lowdb'
+// import { JSONFile, Low } from "lowdb";
+const FileSync = require('lowdb/adapters/FileSync')
+// const adapter = new FileSync(`${process.cwd()}/src/nedb/db.json`)
+// const adapter = new JSONFile(`${process.cwd()}/src/nedb/db.json`)
+// const lowDB = lowdb(adapter)
+
+
+
+
+
+import { Low } from "lowdb";
+import { JSONFile } from "lowdb/node";
+
+type DatabaseSchema = { images: { id: string; path: string }[] };
+
+const adapter = new JSONFile<DatabaseSchema>(`${process.cwd()}/src/nedb/db.json`);
+const lowDB = new Low<DatabaseSchema>(adapter);
+
+// await lowDB.read();
+// lowDB.data ||= { images: [] };
+// await db.write();
+
+
 
 let db = new sqlite3.Database(`${process.cwd()}/src/sqlite3.db`, (err: string) => {
   if (err) {
@@ -233,6 +257,7 @@ const createWindow = () => {
 
   // List Images
   ipcMain.handle('list-images', async () => {
+    console.log('LISSTTTTTT')
     return new Promise<Image[]>((resolve, reject) => {
       const query = `SELECT * FROM images`;
       db.all(query, [], (err: any, rows: Image[]) => {
@@ -403,9 +428,14 @@ const createWindow = () => {
   });
 
   ipcMain.handle('get-images', async () => {
+    console.log('GET IMAGES')
     return new Promise((resolve, reject) => {
-        db.findOne({ id: "root" }, (err: any, root: unknown) => {
-            if (err || !root) reject(new Error("Root not found"));
+      console.log('GET IMAGE INSIDE')
+      return nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
+            if (err || !root) {
+              console.log('GET IMAGES ERROR : ', err)
+              reject(new Error("Root not found"));
+            }
             else {
               const images = getImages(root)
               resolve(images)
@@ -416,31 +446,31 @@ const createWindow = () => {
 
   ipcMain.handle('get-image-by-id', async (_, imageId: string) => {
     return new Promise((resolve, reject) => {
-        db.findOne({ id: "root" }, (err: any, root: unknown) => {
-            if (err || !root) reject(new Error("Root not found"));
-            else {
-              const images = getById(root, imageId)
-              resolve(images)
-            };
-        });
+      nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
+        if (err || !root) reject(new Error("Root not found"));
+        else {
+          const images = getById(root, imageId)
+          resolve(images)
+        };
+      });
     });
   });
 
   ipcMain.handle('get-folders', async () => {
     return new Promise((resolve, reject) => {
-        db.findOne({ id: "root" }, (err: any, root: unknown) => {
-            if (err || !root) reject(new Error("Root not found"));
-            else {
-              const images = getFolders(root)
-              resolve(images)
-            };
-        });
+      nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
+        if (err || !root) reject(new Error("Root not found"));
+        else {
+          const images = getFolders(root)
+          resolve(images)
+        };
+      });
     });
   });
 
   ipcMain.handle('update-image-quality', async (_, obj: any, targetId: string, action: "update", payload?: any) => {
     return new Promise((resolve, reject) => {
-      db.findOne({ id: "root" }, (err: any, root: unknown) => {
+      nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
         if (err || !root) reject(new Error("Root not found"));
         else {
           const images = updateTree(root, targetId, action, payload)
@@ -452,7 +482,7 @@ const createWindow = () => {
 
   ipcMain.handle('update-image-caption', async (_, obj: any, targetId: string, action: "update", payload?: any) => {
     return new Promise((resolve, reject) => {
-      db.findOne({ id: "root" }, (err: any, root: unknown) => {
+      nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
         if (err || !root) reject(new Error("Root not found"));
         else {
           const images = updateTree(root, targetId, action, payload)
@@ -464,7 +494,7 @@ const createWindow = () => {
 
   ipcMain.handle('update-image-version', async (_, obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => {
     return new Promise((resolve, reject) => {
-      db.findOne({ id: "root" }, (err: any, root: unknown) => {
+      nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
         if (err || !root) reject(new Error("Root not found"));
         else {
           const images = updateTree(root, targetId, action, payload)

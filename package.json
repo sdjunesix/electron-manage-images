@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
+  "type": "module",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -26,6 +27,7 @@
     "@electron-forge/plugin-vite": "^7.7.0",
     "@electron/fuses": "^1.8.0",
     "@types/electron-squirrel-startup": "^1.0.2",
+    "@types/lowdb": "^1.0.15",
     "@types/nedb": "^1.8.16",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
@@ -47,12 +49,14 @@
     "electron-squirrel-startup": "^1.0.1",
     "flowbite": "^3.1.2",
     "flowbite-react": "^0.10.2",
+    "lokijs": "^1.5.12",
     "lucide-react": "^0.475.0",
-    "nedb": "^1.8.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.2.0",
     "react-tabs": "^6.1.0",
+    "rxdb": "^16.7.0",
+    "rxjs": "^7.8.2",
     "sqlite3": "^5.1.7"
   }
 }
