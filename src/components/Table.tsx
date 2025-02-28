@@ -39,11 +39,15 @@ export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns
           {rows.map((row: any, index: number) => {
             return (
               <tr key={index} className="bg-white cursor-pointer border-t border-line hover:bg-muted_50">
-                {columns.map((col: any, idx: number) => (
-                  <td key={idx} className="px-4 py-2 rounded-bl-lg">
-                    {formatters[col] ? formatters[col](row[col]) : row[col]}
-                  </td>
-                ))}
+                {columns.map((col: any, idx: number) => {
+                  let value = formatters[col] ? formatters[col](row[col]) : row[col];
+                  if (typeof value == 'object') value = null;
+                  return (
+                    <td key={idx} className="px-4 py-2 rounded-bl-lg">
+                      {value}
+                    </td>
+                  )
+                })}
                 {actions.length > 0 && (
                   <td className="px-4 py-2 rounded-br-lg">
                     {actions.length === 1 ? (
