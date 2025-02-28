@@ -52,6 +52,15 @@ async function initDatabase() {
       FOREIGN KEY (parent_id) REFERENCES tree_nodes(id) ON DELETE CASCADE
     );
   `);
+
+  // Create the `tree` table
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS tree (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      data TEXT NOT NULL
+    );
+  `);
+
   console.log("Database initialized.");
 }
 
