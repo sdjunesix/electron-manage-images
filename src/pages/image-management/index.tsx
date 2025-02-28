@@ -76,21 +76,17 @@ export const ImageManagementPage: FC = () => {
   };
 
   useEffect(() => {
-    console.log('useEffect triggered');
     const fetchData = async () => {
-      console.log('fetchData called');
       try {
         // Use Promise.all to fetch images and folders concurrently
-        const [dataImages1, dataFolders] = await Promise.all([
-          window.electron.listImages(),
-          // window.electron.getImages(),
+        const [dataImages, dataFolders] = await Promise.all([
+          window.electron.getImages(),
           window.electron.getFolders(),
         ]);
 
-        console.log('LIST IMAGE', dataImages1);
-        // console.log('DATA IMAGES ', dataImages);
+        console.log('DATA IMAGES ', dataImages);
         console.log('DATA FOLDES ', dataFolders);
-        // setImages(dataImages);
+        setImages(dataImages);
         setFolders(dataFolders);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -128,12 +124,12 @@ export const ImageManagementPage: FC = () => {
             </div>
           </div>
         )}
-        <Tree
+        {/* <Tree
           nodes={folders}
           currentNode={selectedNode}
           onSelect={setSelectedNode}
           className={classNames('', selectedTab === 'Folders' ? '' : 'min-w-60')}
-        />
+        /> */}
         {selectedTab === 'Images' && (
           <div className="flex-1 px-4">
             <p className="mb-4 p-3 text-muted_foreground bg-muted/50 rounded-lg">

@@ -43,16 +43,6 @@ async function initDatabase() {
     );
   `);
 
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS tree_nodes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tree_id INTEGER NOT NULL,
-      parent_id INTEGER,
-      value TEXT NOT NULL,
-      FOREIGN KEY (parent_id) REFERENCES tree_nodes(id) ON DELETE CASCADE
-    );
-  `);
-
   // Create the `tree` table
   await db.exec(`
     CREATE TABLE IF NOT EXISTS tree (

@@ -2,33 +2,8 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'node:path';
 import fs from 'fs';
 import started from 'electron-squirrel-startup';
-import { Image, Node } from './models';
+import { Image, Node, TreeNode } from './models';
 const sqlite3 = require('sqlite3').verbose();
-import Datastore from 'nedb'; 
-// import lowdb from 'lowdb'
-// import { JSONFile, Low } from "lowdb";
-const FileSync = require('lowdb/adapters/FileSync')
-// const adapter = new FileSync(`${process.cwd()}/src/nedb/db.json`)
-// const adapter = new JSONFile(`${process.cwd()}/src/nedb/db.json`)
-// const lowDB = lowdb(adapter)
-
-
-
-
-
-import { Low } from "lowdb";
-import { JSONFile } from "lowdb/node";
-
-type DatabaseSchema = { images: { id: string; path: string }[] };
-
-const adapter = new JSONFile<DatabaseSchema>(`${process.cwd()}/src/nedb/db.json`);
-const lowDB = new Low<DatabaseSchema>(adapter);
-
-// await lowDB.read();
-// lowDB.data ||= { images: [] };
-// await db.write();
-
-
 
 let db = new sqlite3.Database(`${process.cwd()}/src/sqlite3.db`, (err: string) => {
   if (err) {
@@ -97,6 +72,21 @@ function getImages(node: any): any[] {
   return images;
 }
 
+function filterFolders(node: TreeNode): TreeNode | null {
+  if (node.type !== "folder") return null;
+
+  const filteredChildren = node.children
+    ?.map(filterFolders)
+    .filter((child): child is TreeNode => child !== null) || [];
+
+  return { ...node, children: filteredChildren };
+}
+
+function getFoldersOnly(tree: TreeNode): TreeNode[] {
+  return tree.children
+    ?.map(filterFolders)
+    .filter((child): child is TreeNode => child !== null) || [];
+}
 
 function getFolders(node: any): any[] {
   if (node.type !== "folder" && node.type !== "root") {
@@ -127,15 +117,6 @@ function updateTree(obj: any, targetId: string, action: "add" | "delete" | "upda
   }
   return obj;
 }
-
-
-
-// Initialize database (file-based storage)
-const nedb = new Datastore({
-  filename: `${process.cwd()}/src/nedb/db.json`, // Stores data in 'data.db'
-  autoload: true, // Automatically loads the database on startup
-});
-
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -428,19 +409,21 @@ const createWindow = () => {
   });
 
   ipcMain.handle('get-images', async () => {
-    console.log('GET IMAGES')
     return new Promise((resolve, reject) => {
-      console.log('GET IMAGE INSIDE')
-      return nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
-            if (err || !root) {
-              console.log('GET IMAGES ERROR : ', err)
-              reject(new Error("Root not found"));
-            }
-            else {
-              const images = getImages(root)
-              resolve(images)
-            };
-        });
+      db.get('SELECT data FROM tree WHERE id = ?', [1], (err: any, row: any) => {
+        if (err) {
+          return reject(new Error('Root not found'));
+        } else {
+          try {
+            const root = JSON.parse(row.data);
+            const images = getImages(root);
+            resolve(images);
+          } catch (parseError) {
+            reject(new Error('Invalid JSON data'));
+          }
+        }
+      });
+      
     });
   });
 
@@ -458,12 +441,18 @@ const createWindow = () => {
 
   ipcMain.handle('get-folders', async () => {
     return new Promise((resolve, reject) => {
-      nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
-        if (err || !root) reject(new Error("Root not found"));
-        else {
-          const images = getFolders(root)
-          resolve(images)
-        };
+      db.get('SELECT data FROM tree WHERE id = ?', [1], (err: any, row: any) => {
+        if (err) {
+          return reject(new Error('Root not found'));
+        } else {
+          try {
+            const root = JSON.parse(row.data);
+            const folders = getFoldersOnly(root);
+            resolve(folders);
+          } catch (parseError) {
+            reject(new Error('Invalid JSON data'));
+          }
+        }
       });
     });
   });
