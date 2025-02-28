@@ -1,16 +1,5 @@
 import { FC, useState } from 'react';
-import {
-  ButtonPrimary,
-  Input,
-  Label,
-  ProgressBar,
-  Rating,
-  SingleSelect,
-  Table,
-  Tabs,
-  Tag,
-  Textarea,
-} from '@components';
+import { ButtonPrimary, Input, Label, ProgressBar, Rating, SingleSelect, Table, Tabs, Tag, Textarea } from '@components';
 import { optionsAPI, optionsVersion } from '@constants';
 import { mockTableData } from '@pages/image-management';
 import dayjs from 'dayjs';
