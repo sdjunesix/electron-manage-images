@@ -100,7 +100,7 @@ export const ImageManagementPage: FC = () => {
       <div className="flex items-center justify-between">
         <Tabs tabs={['Images', 'Grid', 'Folders']} currentTab={selectedTab} onSelect={setSelectedTab} />
         <div className='flex space-x-2'>
-          <ButtonPrimary onClick={handleSelectFolder}>
+          <ButtonPrimary disabled={!!rootFolder} onClick={handleSelectFolder}>
             <FaPlus />
             <span>Add Root Folder</span>
           </ButtonPrimary>

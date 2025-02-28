@@ -11,7 +11,7 @@ contextBridge.exposeInMainWorld('electron', {
   
   updateImage: (image: Image) => ipcRenderer.invoke('update-image', image),
   deleteImage: (id: string) => ipcRenderer.invoke('delete-image', id),
-  listImages: () => ipcRenderer.invoke('list-images'),
+  // listImages: () => ipcRenderer.invoke('list-images'),
 
   insertNode: (node: Node) => ipcRenderer.invoke('insert-node', node),
   updateNode: (nodeId: string, newNode: Node) => ipcRenderer.invoke('update-node', nodeId, newNode),
@@ -26,9 +26,9 @@ contextBridge.exposeInMainWorld('electron', {
   getImageDetailsWithVersions: (imageId: string) => ipcRenderer.invoke('get-image-details-with-versions', imageId),
 
   updateTree: (obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => ipcRenderer.invoke('update-tree', obj, targetId, action, payload),
-  getImages: () => ipcRenderer.invoke('get-images'),
+  // getImages: () => ipcRenderer.invoke('get-images'),
   getImageById: (imageId: string) => ipcRenderer.invoke('get-image-by-id', imageId),
-  getFolders: () => ipcRenderer.invoke('get-folders'),
+  // getFolders: () => ipcRenderer.invoke('get-folders'),
   updateImageQuality: (obj: any, targetId: string, newObject: any) => ipcRenderer.invoke('update-image-quality', obj, targetId, newObject),
   updateImageCaption: (obj: any, targetId: string, newObject: any) => ipcRenderer.invoke('update-image-caption', obj, targetId, newObject),
   updateImageVersion: (obj: any, targetId: string, newObject: any) => ipcRenderer.invoke('update-image-version', obj, targetId, newObject),

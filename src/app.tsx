@@ -1,9 +1,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, NavLink, Link } from 'react-router-dom';
-
-import { Image } from './models';
-
 import { ROUTES } from '@constants';
+import { Image } from './models';
 
 declare global {
   interface Window {
