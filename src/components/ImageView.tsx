@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC } from 'react';
 import { classNames } from '@utils';
 
 type ImageViewProps = {
@@ -8,13 +8,6 @@ type ImageViewProps = {
 };
 
 export const ImageView: FC<ImageViewProps> = ({ src, alt = 'Image', className = '' }) => {
-
-  useEffect(() => {
-    fetch('/images/image-empty.png')
-      .then(res => console.log(res.status))
-      .catch(err => console.error(err));
-  }, []);
-
   return (
     <div className={classNames('rounded-lg border border-line overflow-hidden', className)}>
       <img

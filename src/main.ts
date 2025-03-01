@@ -2,10 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'node:path';
 import fs from 'fs';
 import started from 'electron-squirrel-startup';
-import { Image, Node, TreeNode } from './models';
-// import { db, createDatabase } from './db/init';
-import { db, initDatabase } from './init-db'
-// import { addRootFolder } from './db/folderRepository';
+import { db, initDatabase } from './init-db';
 import {  
   addObject,
   deleteById,
@@ -16,7 +13,7 @@ import {
   getFoldersOnly,
   getFolders,
   updateTree
-} from './common'
+} from './utils/common'
 
 let mainWindow: BrowserWindow;
 
@@ -40,11 +37,11 @@ const createWindow = () => {
 
   mainWindow.webContents.openDevTools();
 };
+
 app.on('ready', async () => {
   try {
     await initDatabase();
     createWindow();
-    // registerFolderHandlers(mainWindow);
   } catch (error) {
     console.error("Error create table db:", error);
   }
@@ -93,6 +90,19 @@ process.on('SIGINT', () => {
   } else {
     process.exit(0);
   }
+});
+
+// get root folder
+ipcMain.handle('get-root-folder', async () => {
+  return new Promise((resolve, reject) => {
+    db.get('SELECT * FROM tree LIMIT 1', (err: any, row: any) => {
+      if (err) {
+        return reject(new Error('Root not found'));
+      } else {
+        resolve(row);
+      }
+    });
+  });
 });
 
 // select root folder & set root folder
@@ -192,18 +202,6 @@ ipcMain.handle('get-images', async () => {
   });
 });
 
-ipcMain.handle('get-image-by-id', async (_, imageId: string) => {
-  return new Promise((resolve, reject) => {
-    nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
-      if (err || !root) reject(new Error("Root not found"));
-      else {
-        const images = getById(root, imageId)
-        resolve(images)
-      };
-    });
-  });
-});
-
 ipcMain.handle('get-folders', async () => {
   return new Promise((resolve, reject) => {
     db.get('SELECT data FROM tree WHERE id = ?', [1], (err: any, row: any) => {
@@ -222,38 +220,50 @@ ipcMain.handle('get-folders', async () => {
   });
 });
 
-ipcMain.handle('update-image-quality', async (_, obj: any, targetId: string, action: "update", payload?: any) => {
-  return new Promise((resolve, reject) => {
-    nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
-      if (err || !root) reject(new Error("Root not found"));
-      else {
-        const images = updateTree(root, targetId, action, payload)
-        resolve(images)
-      };
-    });
-  });
-});
+// ipcMain.handle('get-image-by-id', async (_, imageId: string) => {
+//   return new Promise((resolve, reject) => {
+//     nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
+//       if (err || !root) reject(new Error("Root not found"));
+//       else {
+//         const images = getById(root, imageId)
+//         resolve(images)
+//       };
+//     });
+//   });
+// });
 
-ipcMain.handle('update-image-caption', async (_, obj: any, targetId: string, action: "update", payload?: any) => {
-  return new Promise((resolve, reject) => {
-    nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
-      if (err || !root) reject(new Error("Root not found"));
-      else {
-        const images = updateTree(root, targetId, action, payload)
-        resolve(images)
-      };
-    });
-  });
-});
+// ipcMain.handle('update-image-quality', async (_, obj: any, targetId: string, action: "update", payload?: any) => {
+//   return new Promise((resolve, reject) => {
+//     nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
+//       if (err || !root) reject(new Error("Root not found"));
+//       else {
+//         const images = updateTree(root, targetId, action, payload)
+//         resolve(images)
+//       };
+//     });
+//   });
+// });
 
-ipcMain.handle('update-image-version', async (_, obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => {
-  return new Promise((resolve, reject) => {
-    nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
-      if (err || !root) reject(new Error("Root not found"));
-      else {
-        const images = updateTree(root, targetId, action, payload)
-        resolve(images)
-      };
-    });
-  });
-});
+// ipcMain.handle('update-image-caption', async (_, obj: any, targetId: string, action: "update", payload?: any) => {
+//   return new Promise((resolve, reject) => {
+//     nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
+//       if (err || !root) reject(new Error("Root not found"));
+//       else {
+//         const images = updateTree(root, targetId, action, payload)
+//         resolve(images)
+//       };
+//     });
+//   });
+// });
+
+// ipcMain.handle('update-image-version', async (_, obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => {
+//   return new Promise((resolve, reject) => {
+//     nedb.findOne({ id: "root" }, (err: any, root: unknown) => {
+//       if (err || !root) reject(new Error("Root not found"));
+//       else {
+//         const images = updateTree(root, targetId, action, payload)
+//         resolve(images)
+//       };
+//     });
+//   });
+// });

@@ -4,6 +4,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 import { Image, Node } from "./models";
 
 contextBridge.exposeInMainWorld('electron', {
+  getRootFolder: () => ipcRenderer.invoke('get-root-folder'),
   selectFolder: () => ipcRenderer.invoke('select-folder'),
   selectFiles: () => ipcRenderer.invoke('select-files'),
   moveFiles: (files: string[], rootFolder: string) => ipcRenderer.invoke('move-files', files, rootFolder),

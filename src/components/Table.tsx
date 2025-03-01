@@ -1,4 +1,4 @@
-import { FC, JSX, useMemo } from 'react';
+import { FC, isValidElement, JSX, useMemo } from 'react';
 import { classNames } from '@utils';
 import { Dropdown } from './Dropdown';
 
@@ -13,6 +13,7 @@ type TableProps = {
   hiddenColumns?: string[];
   formatters?: Record<string, Formatter>;
   actions?: Action[];
+  isRounded?: boolean;
 };
 
 export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns = [], formatters = {}, actions = [] }) => {
@@ -27,7 +28,11 @@ export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns
           <tr>
             {columns.map((col: any, index: number) => {
               return (
-                <th key={index} scope="col" className="cursor-pointer px-4 py-2.5 text-muted_foreground hover:bg-muted capitalize rounded-t-lg">
+                <th
+                  key={index}
+                  scope="col"
+                  className="cursor-pointer px-4 py-2.5 text-muted_foreground hover:bg-muted capitalize rounded-t-lg whitespace-nowrap"
+                >
                   {col}
                 </th>
               );
@@ -40,13 +45,24 @@ export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns
             return (
               <tr key={index} className="bg-white cursor-pointer border-t border-line hover:bg-muted_50">
                 {columns.map((col: any, idx: number) => {
-                  let value = formatters[col] ? formatters[col](row[col]) : row[col];
-                  if (typeof value == 'object') value = null;
-                  return (
+                  const value = formatters[col] ? formatters[col](row[col]) : row[col];
+                  const element = (
                     <td key={idx} className="px-4 py-2 rounded-bl-lg">
                       {value}
                     </td>
-                  )
+                  );
+
+                  if (isValidElement(value)) {
+                    return element;
+                  } else if (Array.isArray(value) && value.every(isValidElement)) {
+                    return element;
+                  } else if (typeof value === 'number' || typeof value === 'string') {
+                    return element;
+                  } else if (value === null || value === undefined) {
+                    return element;
+                  }
+
+                  return <td key={idx} className="px-4 py-2 rounded-bl-lg"></td>;
                 })}
                 {actions.length > 0 && (
                   <td className="px-4 py-2 rounded-br-lg">

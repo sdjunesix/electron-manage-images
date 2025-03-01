@@ -1,17 +1,18 @@
 import { Fragment, useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, NavLink, Link } from 'react-router-dom';
 import { ROUTES } from '@constants';
-import { Image } from './models';
+import { Image, TreeNode } from './models';
 
 declare global {
   interface Window {
     electron: {
+      getRootFolder: () => Promise<string | null>;
       selectFolder: () => Promise<string | null>;
       selectFiles: () => Promise<string[]>;
       moveFiles: (files: string[], rootFolder: string) => Promise<{ success: boolean; movedFiles?: string[]; error?: string }>;
 
       setRootFolder: () => any;
-     
+
       updateCaption: (imageId: string, newCaption: string) => Promise<{ success: boolean }>;
       updateQuality: (imageId: string, newQuality: number) => Promise<{ success: boolean }>;
       updateVersion: (imageId: string, newVersion: number) => Promise<{ success: boolean }>;
@@ -19,8 +20,8 @@ declare global {
       getImageDetailsWithVersions: (imageId: string) => Promise<any>;
 
       updateTreeData: (id: number, data: string) => Promise<any>;
-      getRoot: () => Promise<any>;
-      getImages: () => Promise<any>;
+      getRoot: () => Promise<TreeNode>;
+      getImages: () => Promise<any[]>;
       getImageById: (imageId: string) => Promise<any>;
       getFolders: () => Promise<any[]>;
       updateImageQuality: (obj: any, targetId: string, newObject: any) => Promise<any>;

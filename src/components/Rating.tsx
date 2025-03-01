@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { FC, useState } from 'react';
 import { HiStar } from 'react-icons/hi';
 import { classNames } from '@utils';
 
@@ -10,7 +10,7 @@ type RatingProps = {
   notHover?: boolean;
 };
 
-export const Rating: React.FC<RatingProps> = ({ size = 6, maxStars = 5, value = 0, onChange, notHover = false }) => {
+export const Rating: FC<RatingProps> = ({ size = 6, maxStars = 5, value = 0, onChange, notHover = false }) => {
   const [hover, setHover] = useState<number | null>(null);
 
   return (
