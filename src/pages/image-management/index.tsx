@@ -24,6 +24,7 @@ export const ImageManagementPage: FC = () => {
   const [selectedNode, setSelectedNode] = useState(null);
   const [imagesNode, setImagesNode] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [images, setImages] = useState([]);
   const [folders, setFolders] = useState([]);
   const [inputValue, setInputValue] = useState<string>('');
@@ -59,8 +60,8 @@ export const ImageManagementPage: FC = () => {
   };
 
   const handleSetImages = (arrImages: any[] = [], currentNode: any) => {
-    const filterImages = arrImages?.filter(img => img?.folders === currentNode?.name);
-    const formatImages = filterImages.map(img => ({
+    const filterImages = arrImages?.filter((img) => img?.folders === currentNode?.name);
+    const formatImages = filterImages.map((img) => ({
       ...img,
       version: img?.data?.current_version,
       caption: img?.data?.versions?.[img?.data?.current_version]?.caption,
@@ -69,7 +70,7 @@ export const ImageManagementPage: FC = () => {
       'Date Added': img?.data?.versions?.[img?.data?.current_version]?.createdAt,
     }));
     setImagesNode(formatImages);
-  }
+  };
 
   const handleSelectFolder = async () => {
     const path = await selectFolder();
@@ -88,7 +89,10 @@ export const ImageManagementPage: FC = () => {
         type: 'image',
         path: f,
         name: getFilenameWithoutExtension(f),
-        data: { current_version: 'v1.0', versions: { 'v1.0': { quality: 3, caption: 'New caption', createdAt: dayjs().format('YYYY MMM DD') } } },
+        data: {
+          current_version: 'v1.0',
+          versions: { 'v1.0': { quality: 3, caption: 'New caption', createdAt: dayjs().format('YYYY MMM DD') } },
+        },
         children: [] as any[],
       };
       addImageToFolder(currentUnassignedFolder, newImage);
@@ -100,25 +104,22 @@ export const ImageManagementPage: FC = () => {
 
   const handleAddFolder = async (folderName: string) => {
     const currentFolderId = orderBy(folders, 'id', 'desc')?.[0]?.id || 0;
-    console.log(currentFolderId)
+    console.log(currentFolderId);
     const newFolder = {
       id: (Number(currentFolderId) + 1).toString(),
       type: 'folder',
       path: rootFolder + '/' + folderName,
       name: folderName,
       data: {},
-      children: [] as any[]
+      children: [] as any[],
     };
     const newRootData = {
       ...rootData,
-      children: [
-        ...rootData.children,
-        newFolder,
-      ]
-    }
+      children: [...rootData.children, newFolder],
+    };
     await window.electron.updateTreeData(1, JSON.stringify(newRootData));
     fetchData();
-  }
+  };
 
   useEffect(() => {
     fetchData();
@@ -167,14 +168,14 @@ export const ImageManagementPage: FC = () => {
           currentNode={selectedNode}
           onSelect={(node) => {
             setSelectedNode(node);
-            handleSetImages(images, node)
+            handleSetImages(images, node);
           }}
           className={classNames('', selectedTab === 'Folders' ? '' : 'min-w-60')}
         />
         {selectedTab === 'Images' && (
           <div className="flex-1 px-4">
             <p className="mb-4 p-3 text-muted_foreground bg-muted/50 rounded-lg">
-              Showing <span className="text-black">6</span> images
+              Showing <span className="text-black">{imagesNode?.length}</span> images
             </p>
             <Table
               rows={imagesNode}
@@ -186,7 +187,7 @@ export const ImageManagementPage: FC = () => {
                   if (!!values?.length) {
                     return values?.map((item: any, index: number) => (
                       <div key={index} className="flex space-x-1">
-                        <Tag  value={item} className="bg-muted border-none" />
+                        <Tag value={item} className="bg-muted border-none" />
                       </div>
                     ));
                   }
@@ -198,7 +199,10 @@ export const ImageManagementPage: FC = () => {
                 {
                   label: '',
                   icon: <FaPencil />,
-                  onClick: (row) => setIsModalOpen(true),
+                  onClick: (row) => {
+                    setSelectedImage(row);
+                    setIsModalOpen(true);
+                  },
                 },
               ]}
             />
@@ -207,24 +211,28 @@ export const ImageManagementPage: FC = () => {
         {selectedTab === 'Grid' && (
           <div className="flex-1 px-4">
             <p className="mb-4 text-right">
-              <span className="py-1 px-2 text-muted_foreground bg-muted/50 rounded-lg">20</span>
+              <span className="py-1 px-2 text-muted_foreground bg-muted/50 rounded-lg">{imagesNode?.length}</span>
             </p>
             <div className="grid grid-cols-4 gap-4">
               {imagesNode.map((image: any) => (
                 <ImageCard
                   key={image.id}
-                  src={image.src}
-                  title={image.title}
+                  src={image.path}
+                  title={image.name}
                   tags={image.tags}
                   version={image.version}
-                  rating={image.rating}
+                  rating={image.quality}
+                  onClick={() => {
+                    setSelectedImage(image);
+                    setIsModalOpen(true);
+                  }}
                 />
               ))}
             </div>
           </div>
         )}
       </div>
-      <ModalImage isOpen={isModalOpen} onClose={setIsModalOpen} />
+      <ModalImage data={selectedImage} rootData={rootData} isOpen={isModalOpen} onRefreshData={fetchData} onClose={setIsModalOpen} />
     </div>
   );
 };

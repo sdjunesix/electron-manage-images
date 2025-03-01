@@ -22,6 +22,8 @@ export const Tree: FC<TreeProps> = ({ nodes, currentNode, onSelect, className = 
     setExpandedNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  if (!nodes?.length) return;
+
   return (
     <ul className={classNames('text-sm select-none', className)}>
       {nodes.map((node) => {
@@ -39,7 +41,7 @@ export const Tree: FC<TreeProps> = ({ nodes, currentNode, onSelect, className = 
             >
               {children && (
                 <span className="mr-2" onClick={() => toggleNode(id)}>
-                  {expandedNodes[id] ? <FaFolderOpen /> : <FaFolderClosed />}
+                  {expandedNodes[id] ? <FaFolderOpen className='hover:text-blue-500' /> : <FaFolderClosed className='hover:text-blue-500' />}
                 </span>
               )}
               <span>{name}</span>
