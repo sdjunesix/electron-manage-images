@@ -37,6 +37,7 @@ export const ImageManagementPage: FC = () => {
     // const files = await selectFiles();
     const files = await window.electron.selectFiles();
     setSelectedFiles(files);
+    await window.electron.moveFiles(files, rootFolder)
     // trasnform files to images & add to unassigned folder
     let currentUnassginedFolder = getUnassignedFolder(rootData)
     files.map(f => {
