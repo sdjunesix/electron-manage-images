@@ -1,14 +1,15 @@
 import { Dispatch, FC, SetStateAction, useState } from 'react';
 import { FiFolderPlus } from 'react-icons/fi';
 import { Modal, ButtonOutline, ButtonPrimary, Rating, Label, Input, ImageView, Tabs, Tag, Textarea, Tree } from '@components';
-import { mockTreeData } from '@pages/image-management';
+// import { mockTreeData } from '@pages/image-management';
 
 type ModalImageProps = {
   isOpen: boolean;
   onClose: Dispatch<SetStateAction<boolean>>;
+  folders?: any;
 };
 
-export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose }) => {
+export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose, folders }) => {
   const [star, setStar] = useState(0);
   const [selectedTab, setSelectedTab] = useState('Images');
 
@@ -35,7 +36,7 @@ export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose }) => {
                   </ButtonOutline>
                 </p>
               </div>
-              <Tree nodes={mockTreeData} currentNode={null} onSelect={() => {}} className='border border-line p-2 rounded-md' />
+              <Tree nodes={folders} currentNode={null} onSelect={() => {}} className='border border-line p-2 rounded-md' />
             </div>
           )}
           {selectedTab === 'Caption' && (

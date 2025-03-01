@@ -8,51 +8,6 @@ import { classNames } from '@utils';
 import ImageCard from './ImageCard';
 import { selectFiles, selectFolder } from '@services';
 
-export const mockTreeData: any = [
-  {
-    id: '1',
-    name: 'Root 1',
-    children: [
-      {
-        id: '1-1',
-        name: 'Folder A',
-        children: [
-          { id: '1-1-1', name: 'File A1' },
-          { id: '1-1-2', name: 'File A2' },
-        ],
-      },
-      {
-        id: '1-2',
-        name: 'Folder B',
-        children: [{ id: '1-2-1', name: 'File B1' }],
-      },
-    ],
-  },
-  {
-    id: '2',
-    name: 'Root 2',
-    children: [
-      {
-        id: '2-1',
-        name: 'Folder A',
-        children: null,
-      },
-      {
-        id: '2-2',
-        name: 'Folder B',
-        children: [{ id: '2-2-1', name: 'File B1' }],
-      },
-    ],
-  },
-];
-
-// 'Name', 'Date Added', 'Folders', 'Captions', 'Version', 'Quality', 'Actions'
-export const mockTableData: any = [
-  { id: 1, name: 'Product A', quality: 2, version: 'v1.1', captions: true, 'Date Added': Date(), folders: ['Test'] },
-  { id: 2, name: 'Product B', quality: 1, version: '', captions: false, 'Date Added': Date(), folders: [] },
-  { id: 3, name: 'Product C', quality: 4, version: '', captions: true, 'Date Added': Date(), folders: [] },
-];
-
 export const ImageManagementPage: FC = () => {
   const [rootFolder, setRootFolder] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
@@ -124,12 +79,12 @@ export const ImageManagementPage: FC = () => {
             </div>
           </div>
         )}
-        {/* <Tree
+        <Tree
           nodes={folders}
           currentNode={selectedNode}
           onSelect={setSelectedNode}
           className={classNames('', selectedTab === 'Folders' ? '' : 'min-w-60')}
-        /> */}
+        />
         {selectedTab === 'Images' && (
           <div className="flex-1 px-4">
             <p className="mb-4 p-3 text-muted_foreground bg-muted/50 rounded-lg">

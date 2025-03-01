@@ -1,11 +1,15 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { FiFolder } from 'react-icons/fi';
 import { ButtonOutline, Tree } from '@components';
-import { mockTreeData } from '@pages/image-management';
+// import { mockTreeData } from '@pages/image-management';
 import { ModalNewFolder } from './ModalNewFolder';
 import { FaPlus } from 'react-icons/fa';
+type DropdownFolderProps = {
+  folders?: any;
+};
 
-export const DropdownFolder: FC = () => {
+
+export const DropdownFolder: FC<DropdownFolderProps> = ({folders}) => {
   const dropdownFolderRef = useRef<HTMLDivElement>(null);
 
   const [open, setOpen] = useState(false);
@@ -37,7 +41,7 @@ export const DropdownFolder: FC = () => {
               <span>Add Folder</span>
             </ButtonOutline>
           </div>
-          <Tree nodes={mockTreeData} currentNode={selectedNode} onSelect={setSelectedNode} className="w-full p-2" />
+          <Tree nodes={folders} currentNode={selectedNode} onSelect={setSelectedNode} className="w-full p-2" />
         </div>
       )}
       <ModalNewFolder isOpen={openNewFolder} onClose={setOpenNewFolder} />

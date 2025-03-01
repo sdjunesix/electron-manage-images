@@ -1,13 +1,17 @@
 import { FC, useState } from 'react';
 import { ButtonPrimary, Input, Label, ProgressBar, Rating, SingleSelect, Table, Tabs, Tag, Textarea } from '@components';
 import { optionsAPI, optionsVersion } from '@constants';
-import { mockTableData } from '@pages/image-management';
+// import { mockTableData } from '@pages/image-management';
 import dayjs from 'dayjs';
 import { FaPencil, FaPlus } from 'react-icons/fa6';
 import { DropdownFolder } from './DropdownFolder';
 import { ModalAddCaption } from './ModalAddCaption';
 
-export const CaptionManagementPage: FC = () => {
+type CaptionManagementPagePros = {
+  images: any[]
+}
+
+export const CaptionManagementPage: FC<CaptionManagementPagePros> = ({images}) => {
   const [selectedTab, setSelectedTab] = useState('Images');
   const [selectedOptionVersion, setSelectedVersion] = useState(optionsVersion[0]);
   const [selectedOptionApi, setSelectedOptionApi] = useState(null);
@@ -38,7 +42,7 @@ export const CaptionManagementPage: FC = () => {
             </div>
             <Table
               className="border-t border-line"
-              rows={mockTableData}
+              rows={images}
               hiddenColumns={['id']}
               formatters={{
                 'Date Added': (value: any) => dayjs(value).format('D/M/YYYY'),

@@ -9,11 +9,9 @@ declare global {
       selectFolder: () => Promise<string | null>;
       selectFiles: () => Promise<string[]>;
       moveFiles: (files: string[], rootFolder: string) => Promise<{ success: boolean; movedFiles?: string[]; error?: string }>;
-      createImage: (image: Image) => Promise<{ success: boolean }>;
-      // getImageById: (id: string) => Promise<Image>;
-      updateImage: (image: Image) => Promise<{ success: boolean }>;
-      deleteImage: (id: string) => Promise<{ success: boolean }>;
-      listImages: () => Promise<Image[]>;
+
+      setRootFolder: () => any;
+     
       updateCaption: (imageId: string, newCaption: string) => Promise<{ success: boolean }>;
       updateQuality: (imageId: string, newQuality: number) => Promise<{ success: boolean }>;
       updateVersion: (imageId: string, newVersion: number) => Promise<{ success: boolean }>;
@@ -25,6 +23,8 @@ declare global {
       getImageById: (imageId: string) => Promise<any>;
       getFolders: () => Promise<any>;
       updateImageQuality: (obj: any, targetId: string, newObject: any) => Promise<any>;
+
+
     };
   }
 }
@@ -40,9 +40,9 @@ const App = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await window.electron.listImages();
-        setUnassigned(data.filter((item) => !item.savedFolder));
-        setAssigned(data.filter((item) => item.savedFolder));
+        const data = await window.electron.getImages();
+        setUnassigned(data.filter((item: { savedFolder: any; }) => !item.savedFolder));
+        setAssigned(data.filter((item: { savedFolder: any; }) => item.savedFolder));
       } catch (error) {
         console.error('Error loading data:', error);
       }

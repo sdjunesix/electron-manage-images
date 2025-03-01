@@ -6,14 +6,14 @@
     "data": {},
     "children": [
         { 
-            "id": "",
+            "id": "1",
             "type": "folder",
             "path": "/Users/sdjune6/ws/electron-manage-images/unassigned",
             "name": "Unassigned",
             "data": {},
             "children": [
                 {
-                    "id": "",
+                    "id": "1.1",
                     "type": "image",
                     "path": "/Users/sdjune6/ws/electron-manage-images",
                     "name": "Root Folder Galaxy",
@@ -32,19 +32,19 @@
             ]
         },
         {
-            "id": "",
+            "id": "2",
             "type": "folder",
             "path": "/Users/sdjune6/ws/electron-manage-images",
             "name": "Iterator",
             "children": [
                 {
-                    "id": "child-folder-1",
+                    "id": "2.1",
                     "type": "folder",
                     "path": "/Users/sdjune6/ws/electron-manage-images",
                     "name": "Rooms",
                     "children": [
                         {
-                            "id": "",
+                            "id": "2.1.1",
                             "type": "image",
                             "path": "/Users/sdjune6/ws/electron-manage-images",
                             "name": "Image 1",
