@@ -18,10 +18,11 @@ declare global {
       updateFolder: (imageId: string, newFolder: string) => Promise<{ success: boolean }>;
       getImageDetailsWithVersions: (imageId: string) => Promise<any>;
 
-      updateTree: (obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => Promise<any>;
+      updateTreeData: (id: number, data: string) => Promise<any>;
+      getRoot: () => Promise<any>;
       getImages: () => Promise<any>;
       getImageById: (imageId: string) => Promise<any>;
-      getFolders: () => Promise<any>;
+      getFolders: () => Promise<any[]>;
       updateImageQuality: (obj: any, targetId: string, newObject: any) => Promise<any>;
 
 
@@ -87,8 +88,6 @@ const App = () => {
   }, [unassigned, assigned]);
 
   const handleMoveFiles = async () => {
-    console.log('ROOT FOLDER', rootFolder);
-    console.log('FILES', selectedFiles);
     if (!rootFolder) {
       alert('Please select a root folder first.');
       return;

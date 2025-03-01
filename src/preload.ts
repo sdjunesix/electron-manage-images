@@ -10,7 +10,8 @@ contextBridge.exposeInMainWorld('electron', {
 
   getImageDetailsWithVersions: (imageId: string) => ipcRenderer.invoke('get-image-details-with-versions', imageId),
 
-  updateTree: (obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => ipcRenderer.invoke('update-tree', obj, targetId, action, payload),
+  updateTreeData: (id: number, data: string) => ipcRenderer.invoke('update-tree-data', id, data),
+  getRoot: () => ipcRenderer.invoke('get-root'),
   getImages: () => ipcRenderer.invoke('get-images'),
   getImageById: (imageId: string) => ipcRenderer.invoke('get-image-by-id', imageId),
   getFolders: () => ipcRenderer.invoke('get-folders'),

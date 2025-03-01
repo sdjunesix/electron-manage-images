@@ -8,7 +8,16 @@ import { classNames } from '@utils';
 import ImageCard from './ImageCard';
 import { selectFiles, selectFolder } from '@services';
 
+import {
+  getAssignedFolders,
+  getUnassignedFolder,
+  addImageToFolder,
+  updateById,
+  getFilenameWithoutExtension
+} from '../../common'
+
 export const ImageManagementPage: FC = () => {
+  const [rootData, setRootData] = useState<string | null>(null);
   const [rootFolder, setRootFolder] = useState<string | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [selectedTab, setSelectedTab] = useState('Images');
@@ -25,22 +34,38 @@ export const ImageManagementPage: FC = () => {
   };
 
   const handleSelectFiles = async () => {
-    const files = await selectFiles();
+    // const files = await selectFiles();
+    const files = await window.electron.selectFiles();
     setSelectedFiles(files);
-    console.log(files)
+    // trasnform files to images & add to unassigned folder
+    let currentUnassginedFolder = getUnassignedFolder(rootData)
+    files.map(f => {
+      const newImage = {
+        type: "image",
+        path: f,
+        name: getFilenameWithoutExtension(f),
+        data: { current_version: "v1.0", versions: { "v1.0": { quality: 3, caption: "New caption", createdAt: "2025 Mar 01" } } },
+        children: [] as any[]
+      }
+      console.log(newImage)
+      addImageToFolder(currentUnassginedFolder, newImage)
+    })
+    const updatedRoot = updateById(rootData, '1', currentUnassginedFolder)
+    await window.electron.updateTreeData(1, JSON.stringify(updatedRoot))
+
+    await window.electron.getRoot()
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Use Promise.all to fetch images and folders concurrently
-        const [dataImages, dataFolders] = await Promise.all([
+        let [root, dataImages, dataFolders] = await Promise.all([
+          window.electron.getRoot(),
           window.electron.getImages(),
           window.electron.getFolders(),
         ]);
-
-        console.log('DATA IMAGES ', dataImages);
-        console.log('DATA FOLDES ', dataFolders);
+        setRootData(root);
         setImages(dataImages);
         setFolders(dataFolders);
       } catch (error) {

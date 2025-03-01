@@ -143,9 +143,33 @@ ipcMain.handle('move-files', async (_, files, rootFolder) => {
   return { success: true, movedFiles };
 });
 
-ipcMain.handle('update-tree', async (_, obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any) => {
+ipcMain.handle('get-root', async () => {
   return new Promise((resolve, reject) => {
+    db.get('SELECT data FROM tree WHERE id = ?', [1], (err: any, row: any) => {
+      if (err) {
+        return reject(new Error('Root not found'));
+      } else {
+        try {
+          const root = JSON.parse(row.data);
+          resolve(root);
+        } catch (parseError) {
+          reject(new Error('Invalid JSON data NOTHING IN >>>'));
+        }
+      }
+    });
     
+  });
+});
+
+ipcMain.handle('update-tree-data', async (_, id: number = 1, data: string) => {
+  return new Promise((resolve, reject) => {
+    db.run('UPDATE tree SET data = ? WHERE id = ?', [data, id], (updateErr: any) => {
+      if (updateErr) {
+        return reject(new Error('Error updating tree data'));
+      } else {
+        resolve({ success: true });
+      }
+    });
   });
 });
 

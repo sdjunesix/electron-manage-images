@@ -91,6 +91,36 @@ export  function getFolders(node: any): any[] {
     };
   }
   
+
+// export  function getUnassignedFolder(folders: any[]): any {
+//   const matchedFolders = folders.filter(f => f.id === '1')
+//   return matchedFolders[0]
+// }
+
+export function getUnassignedFolder(root: any): any {
+  for (const folder of root.children) {
+    if (folder.id === "1") {
+      return folder; // Return immediately when found
+    }
+  }
+  return null; // Return null if not found
+}
+
+// export function getAssignedFolders(folders: any[]): any[] {
+//   return folders.filter(f => f.id !== '1')
+// }
+export function getAssignedFolders(root: any): any[] {
+  const assignedFolders: any[] = [];
+
+  for (const folder of root.children) {
+    if (folder.id !== "1") {
+      assignedFolders.push(folder); // Add folder if it's not '1'
+    }
+  }
+
+  return assignedFolders;
+}
+
   
 export  function updateTree(obj: any, targetId: string, action: "add" | "delete" | "update", payload?: any): any {
     if (Array.isArray(obj)) {
@@ -108,3 +138,24 @@ export  function updateTree(obj: any, targetId: string, action: "add" | "delete"
     return obj;
   }
 
+export function addImageToFolder(folder: any, newImageData: any): any {
+  // Generate new ID
+  const newId = `${folder.id}.${folder.children.length + 1}`
+  // Create new image object
+  const newImage = {
+    id: newId,
+    type: "image",
+    path: newImageData.path,
+    name: newImageData.name || `Image ${newId}`,
+    data: newImageData.data || {},
+    children: [] as any[]
+  };
+  // Add to children
+  folder.children.push(newImage);
+  
+  return folder; // Return updated folder
+}
+
+export function getFilenameWithoutExtension(filePath: string): string {
+  return filePath.split('/').pop()?.replace(/\.png$/, '') ?? '';
+}
