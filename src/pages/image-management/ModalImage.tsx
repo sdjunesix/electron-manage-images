@@ -1,6 +1,7 @@
 import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
 import { FiFolderPlus } from 'react-icons/fi';
 import { Modal, ButtonOutline, ButtonPrimary, Rating, Label, Input, ImageView, Tabs, Tag, Textarea, Tree } from '@components';
+import dayjs from 'dayjs';
 import { TreeNode } from '@models/index';
 import { updateById } from '@utils';
 
@@ -23,18 +24,23 @@ export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose, folders = [],
 
   const onSaveChanges = async () => {
     setLoading(true);
+    const versionSuffix = data?.current_version?.split('.')?.[1] || 0;
+    const versionPrefix = data?.current_version?.split('.')?.[0] || 'v1';
+    const version = `${versionPrefix}.${Number(versionSuffix) + 1}`;
     const newImage = {
       id: data?.id,
       type: data?.type,
       path: data?.path,
       name: inputName,
       data: {
-        current_version: data?.version,
-        versions: { [data?.version]: { quality, caption: inputCaption, createdAt: data?.['Date Added'] } },
+        current_version: version,
+        versions: { 
+          ...data.data?.versions,
+          [version]: { quality, caption: inputCaption, date_added: dayjs().format('YYYY MMM DD') }
+        },
       },
       children: [] as any[],
     };
-    console.log(newImage)
     const updatedRoot = updateById(rootData, data?.id, newImage);
     await window.electron.updateTreeData(1, JSON.stringify(updatedRoot));
     setLoading(false);

@@ -30,7 +30,7 @@ const ImageCard: FC<ImageCardProps> = ({ src, title, tags = [], version, rating,
     <div className="relative group cursor-pointer" onClick={onClick}>
       <ImageView src={`file://${src}`} />
       <div className="absolute inset-0 bg-black/50 text-white rounded-lg space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2">
-        <h3 className="font-medium">{title}</h3>
+        <h3 className="font-medium truncate">{title}</h3>
         <p className="flex items-center space-x-2">
           {tags.map((tag, index) => (
             <Tag key={index} value={tag} className="bg-white/20 border-none" />

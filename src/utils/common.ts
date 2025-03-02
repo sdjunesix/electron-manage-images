@@ -61,6 +61,22 @@ export function getImages(node: any): any[] {
   return images;
 }
 
+export function filterNodeType (node: TreeNode, type: 'root' | 'folder' | 'image' = 'root', parent: TreeNode | null = null) {
+  let result: (TreeNode & { parent: TreeNode | null }) [] = [];
+
+  if (node?.type === type) {
+    result.push({ ...node, parent });
+  }
+
+  if (node?.children) {
+    node.children.forEach((child) => {
+      result = result.concat(filterNodeType(child, type, node));
+    });
+  }
+
+  return result;
+};
+
 export function filterFolders(node: TreeNode): TreeNode | null {
   if (node.type !== 'folder') return null;
 

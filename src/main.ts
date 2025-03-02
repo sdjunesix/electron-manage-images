@@ -127,6 +127,21 @@ ipcMain.handle('select-folder', async () => {
 ipcMain.handle('select-files', async () => {
   const result = await dialog.showOpenDialog(mainWindow, {
     properties: ['openFile', 'multiSelections'],
+    filters: [
+      { 
+        name: 'Images', 
+        extensions: [
+          // normal
+          'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'tiff', 'tif',
+          // iOS/Apple
+          'heic', 'heif',
+          // RAW
+          'raw', 'arw', 'cr2', 'nef', 'orf', 'rw2',
+          // other
+          'ico', 'avif', 'jfif'
+        ] 
+      }
+    ]
   });
   return result.filePaths;
 });

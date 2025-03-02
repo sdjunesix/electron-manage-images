@@ -11,6 +11,8 @@ import {
   addImageToFolder,
   updateById,
   getFilenameWithoutExtension,
+  filterNodeType,
+  deleteById,
 } from '@utils';
 import ImageCard from './ImageCard';
 import { selectFiles, selectFolder } from '@services';
@@ -31,25 +33,22 @@ export const ImageManagementPage: FC = () => {
 
   const fetchData = async () => {
     try {
-      // Use Promise.all to fetch images and folders concurrently
       let [root, dataImages, dataFolders] = await Promise.all([
         window.electron.getRoot(),
         window.electron.getImages(),
         window.electron.getFolders(),
       ]);
-      // console.log('root folder: ', root);
+      // console.log('root: ', root);
       // console.log('dataFolders: ', dataFolders);
       // console.log('dataImages: ', dataImages);
       if (!!root) {
         setRootFolder(root.path);
       }
       let currentNode = null;
-      if (!!dataFolders?.length) {
-        currentNode = dataFolders[0];
+      if (!!root?.children?.length) {
+        currentNode = root?.children[0];
+        handleSetImages(currentNode);
         setSelectedNode(currentNode);
-      }
-      if (!!currentNode && !!dataImages?.length) {
-        handleSetImages(dataImages, currentNode);
       }
       setRootData(root);
       setFolders(dataFolders);
@@ -59,15 +58,15 @@ export const ImageManagementPage: FC = () => {
     }
   };
 
-  const handleSetImages = (arrImages: any[] = [], currentNode: any) => {
-    const filterImages = arrImages?.filter((img) => img?.folders === currentNode?.name);
-    const formatImages = filterImages.map((img) => ({
+  const handleSetImages = (currentNode: any) => {
+    const filterImages = filterNodeType(currentNode, 'image');
+    const formatImages = filterImages.map((img: any) => ({
       ...img,
       version: img?.data?.current_version,
       caption: img?.data?.versions?.[img?.data?.current_version]?.caption,
       quality: img?.data?.versions?.[img?.data?.current_version]?.quality,
-      folders: [img?.folders],
-      'Date Added': img?.data?.versions?.[img?.data?.current_version]?.createdAt,
+      folders: [img?.parent?.name],
+      date_added: img?.data?.versions?.[img?.data?.current_version]?.date_added,
     }));
     setImagesNode(formatImages);
   };
@@ -91,7 +90,7 @@ export const ImageManagementPage: FC = () => {
         name: getFilenameWithoutExtension(f),
         data: {
           current_version: 'v1.0',
-          versions: { 'v1.0': { quality: 3, caption: 'New caption', createdAt: dayjs().format('YYYY MMM DD') } },
+          versions: { 'v1.0': { quality: 3, caption: 'New caption', date_added: dayjs().format('YYYY MMM DD') } },
         },
         children: [] as any[],
       };
@@ -103,8 +102,7 @@ export const ImageManagementPage: FC = () => {
   };
 
   const handleAddFolder = async (folderName: string) => {
-    const currentFolderId = orderBy(folders, 'id', 'desc')?.[0]?.id || 0;
-    console.log(currentFolderId);
+    const currentFolderId = orderBy(rootData?.children, 'id', 'desc')?.[0]?.id || 0;
     const newFolder = {
       id: (Number(currentFolderId) + 1).toString(),
       type: 'folder',
@@ -121,9 +119,28 @@ export const ImageManagementPage: FC = () => {
     fetchData();
   };
 
+  const handleUpdateFolder = async (node: TreeNode) => {
+    const updatedRoot = updateById(rootData, node?.id, node);
+    await window.electron.updateTreeData(1, JSON.stringify(updatedRoot));
+    fetchData();
+  };
+
+  const handleRemoveFolder = async (node: TreeNode) => {
+    const updatedRoot = deleteById(rootData, node?.id);
+    await window.electron.updateTreeData(1, JSON.stringify(updatedRoot));
+    fetchData();
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (selectedTab === 'Folders') {
+      setSelectedNode(null);
+      setImagesNode([]);
+    }
+  }, [selectedTab]);
 
   return (
     <div className="p-5">
@@ -152,7 +169,6 @@ export const ImageManagementPage: FC = () => {
               <ButtonPrimary
                 disabled={!inputValue}
                 onClick={() => {
-                  console.log(inputValue);
                   handleAddFolder(inputValue);
                   setInputValue('');
                 }}
@@ -164,13 +180,18 @@ export const ImageManagementPage: FC = () => {
           </div>
         )}
         <Tree
-          nodes={folders}
+          nodes={rootData?.children}
           currentNode={selectedNode}
           onSelect={(node) => {
+            if (selectedTab === 'Folders') return;
             setSelectedNode(node);
-            handleSetImages(images, node);
+            handleSetImages(node);
           }}
           className={classNames('', selectedTab === 'Folders' ? '' : 'min-w-60')}
+          showAction={selectedTab === 'Folders'}
+          // quantity={imagesNode?.length}
+          onUpdate={handleUpdateFolder}
+          onDelete={handleRemoveFolder}
         />
         {selectedTab === 'Images' && (
           <div className="flex-1 px-4">
@@ -181,7 +202,7 @@ export const ImageManagementPage: FC = () => {
               rows={imagesNode}
               hiddenColumns={['id', 'type', 'path', 'data', 'children']}
               formatters={{
-                'Date Added': (value: any) => dayjs(value).format('D/M/YYYY'),
+                date_added: (value: any) => dayjs(value).format('D/M/YYYY'),
                 quality: (value: any) => <Rating value={value} notHover size={4} />,
                 folders: (values: any) => {
                   if (!!values?.length) {
