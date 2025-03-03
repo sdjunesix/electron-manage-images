@@ -1,0 +1,5 @@
+files:
+  - "**/*"
+extraResources:
+  - from: "public"
+    to: "public"

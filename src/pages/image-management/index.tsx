@@ -15,14 +15,14 @@ import {
   deleteById,
 } from '@utils';
 import ImageCard from './ImageCard';
-import { selectFiles, selectFolder } from '@services';
+import { getRootFolder, selectFiles, selectFolder } from '@services';
 import { TreeNode } from '@models/index';
 import { orderBy } from 'lodash';
 
 export const ImageManagementPage: FC = () => {
   const [rootData, setRootData] = useState<TreeNode | null>(null);
-  const [rootFolder, setRootFolder] = useState<string | null>(null);
-  const [selectedTab, setSelectedTab] = useState('Folders');
+  const [rootFolder, setRootFolder] = useState<string | null>('');
+  const [selectedTab, setSelectedTab] = useState('Images');
   const [selectedNode, setSelectedNode] = useState(null);
   const [imagesNode, setImagesNode] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,6 +30,11 @@ export const ImageManagementPage: FC = () => {
   const [images, setImages] = useState([]);
   const [folders, setFolders] = useState([]);
   const [inputValue, setInputValue] = useState<string>('');
+
+  const fetchRootFolder = async () => {
+    const rootNode: TreeNode = await getRootFolder();
+    if (rootNode) setRootFolder(rootNode.path);
+  };
 
   const fetchData = async () => {
     try {
@@ -41,9 +46,6 @@ export const ImageManagementPage: FC = () => {
       // console.log('root: ', root);
       // console.log('dataFolders: ', dataFolders);
       // console.log('dataImages: ', dataImages);
-      if (!!root) {
-        setRootFolder(root.path);
-      }
       let currentNode = null;
       if (!!root?.children?.length) {
         currentNode = root?.children[0];
@@ -81,12 +83,11 @@ export const ImageManagementPage: FC = () => {
   const handleSelectFiles = async () => {
     const files = await selectFiles();
     await window.electron.moveFiles(files, rootFolder);
-    // transform files to images & add to unassigned folder
     let currentUnassignedFolder = getUnassignedFolder(rootData);
     files.map((f) => {
       const newImage = {
         type: 'image',
-        path: f,
+        path: rootFolder + '/' + f.split('/').pop(),
         name: getFilenameWithoutExtension(f),
         data: {
           current_version: 'v1.0',
@@ -143,8 +144,8 @@ export const ImageManagementPage: FC = () => {
     // }
 
     if (position === 'inside') {
-			const targetLevel = targetNode.id.split('.').length;
-			console.log(targetNode.id, targetLevel)
+      const targetLevel = targetNode.id.split('.').length;
+      console.log(targetNode.id, targetLevel);
       if (targetLevel > 1 && draggedNode.children && draggedNode.children.length > 0) return;
     }
 
@@ -263,6 +264,7 @@ export const ImageManagementPage: FC = () => {
   };
 
   useEffect(() => {
+    fetchRootFolder();
     fetchData();
   }, []);
 
@@ -270,6 +272,12 @@ export const ImageManagementPage: FC = () => {
     if (selectedTab === 'Folders') {
       setSelectedNode(null);
       setImagesNode([]);
+    } else {
+      if (!!rootData?.children?.length) {
+        const currentNode = rootData?.children[0];
+        handleSetImages(currentNode);
+        setSelectedNode(currentNode);
+      }
     }
   }, [selectedTab]);
 
@@ -278,7 +286,7 @@ export const ImageManagementPage: FC = () => {
       <div className="flex items-center justify-between">
         <Tabs tabs={['Images', 'Grid', 'Folders']} currentTab={selectedTab} onSelect={setSelectedTab} />
         <div className="flex space-x-2">
-          <ButtonPrimary disabled={!!rootFolder} onClick={handleSelectFolder}>
+          <ButtonPrimary onClick={handleSelectFolder}>
             <FaPlus />
             <span>Add Root Folder</span>
           </ButtonPrimary>
@@ -367,20 +375,24 @@ export const ImageManagementPage: FC = () => {
               <span className="py-1 px-2 text-muted_foreground bg-muted/50 rounded-lg">{imagesNode?.length}</span>
             </p>
             <div className="grid grid-cols-4 gap-4">
-              {imagesNode.map((image: any) => (
-                <ImageCard
-                  key={image.id}
-                  src={image.path}
-                  title={image.name}
-                  tags={image.tags}
-                  version={image.version}
-                  rating={image.quality}
-                  onClick={() => {
-                    setSelectedImage(image);
-                    setIsModalOpen(true);
-                  }}
-                />
-              ))}
+              {imagesNode?.length ? (
+                imagesNode.map((image: any) => (
+                  <ImageCard
+                    key={image.id}
+                    src={image.path}
+                    title={image.name}
+                    tags={image.tags}
+                    version={image.version}
+                    rating={image.quality}
+                    onClick={() => {
+                      setSelectedImage(image);
+                      setIsModalOpen(true);
+                    }}
+                  />
+                ))
+              ) : (
+                <p className="text-center p-4">No data available</p>
+              )}
             </div>
           </div>
         )}

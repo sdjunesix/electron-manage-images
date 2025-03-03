@@ -1,7 +1,7 @@
-// import { TreeNodeResponse } from "types/response";
+import { TreeNode } from "@models/index";
 
-export const getRootFolder = async (): Promise<string | null> => {
-  const row: string = await window.electron.getRootFolder();
+export const getRootFolder = async (): Promise<TreeNode | null> => {
+  const row: TreeNode = await window.electron.getRootFolder();
   return row || null;
 };
 

@@ -6,7 +6,7 @@ import { Image, TreeNode } from './models';
 declare global {
   interface Window {
     electron: {
-      getRootFolder: () => Promise<string | null>;
+      getRootFolder: () => Promise<TreeNode | null>;
       selectFolder: () => Promise<string | null>;
       selectFiles: () => Promise<string[]>;
       moveFiles: (files: string[], rootFolder: string) => Promise<{ success: boolean; movedFiles?: string[]; error?: string }>;
@@ -26,7 +26,7 @@ declare global {
       getFolders: () => Promise<any[]>;
       updateImageQuality: (obj: any, targetId: string, newObject: any) => Promise<any>;
 
-
+      getImagesFromFolder: (folderPath: string) => Promise<any>;
     };
   }
 }
