@@ -1,4 +1,4 @@
-import { DragEvent, FC, useEffect, useState } from 'react';
+import { DragEvent, FC, useState } from 'react';
 import { FaFolderClosed, FaFolderOpen } from 'react-icons/fa6';
 import { RiDeleteBin6Line, RiPencilFill } from 'react-icons/ri';
 import { IoClose, IoCheckmark } from 'react-icons/io5';

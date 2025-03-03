@@ -1,26 +1,26 @@
-import { Dispatch, FC, SetStateAction, useEffect, useState } from 'react';
-import { FiFolderPlus } from 'react-icons/fi';
-import { Modal, ButtonOutline, ButtonPrimary, Rating, Label, Input, ImageView, Tabs, Tag, Textarea, Tree } from '@components';
+import { Dispatch, FC, SetStateAction, useEffect, useMemo, useState } from 'react';
+import { Modal, ButtonOutline, ButtonPrimary, Rating, Label, Input, ImageView, Tabs, Tag, Textarea, MultiSelect } from '@components';
 import dayjs from 'dayjs';
 import { TreeNode } from '@models/index';
 import { updateById } from '@utils';
+import { Option } from 'types/common';
 
 type ModalImageProps = {
   isOpen: boolean;
   onClose: Dispatch<SetStateAction<boolean>>;
   onRefreshData?: () => void;
-  folders?: any;
   data: any;
   rootData: TreeNode | null;
 };
 
-export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose, folders = [], data, rootData, onRefreshData }) => {
+export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose, data, rootData, onRefreshData }) => {
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState('Folders');
   const [quality, setQuality] = useState(0);
   const [inputName, setInputName] = useState<string>('');
   const [inputCaption, setInputCaption] = useState<string>('');
-  const [inputFolder, setInputFolder] = useState<string>('');
+  const [selectedFolders, setSelectedFolders] = useState<Option[]>([]);
+  const [isChange, setIsChange] = useState<boolean>(false);
 
   const onSaveChanges = async () => {
     setLoading(true);
@@ -34,9 +34,9 @@ export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose, folders = [],
       name: inputName,
       data: {
         current_version: version,
-        versions: { 
+        versions: {
           ...data.data?.versions,
-          [version]: { quality, caption: inputCaption, date_added: dayjs().format('YYYY MMM DD') }
+          [version]: { quality, caption: inputCaption, date_added: dayjs().format('YYYY MMM DD') },
         },
       },
       children: [] as any[],
@@ -44,40 +44,118 @@ export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose, folders = [],
     const updatedRoot = updateById(rootData, data?.id, newImage);
     await window.electron.updateTreeData(1, JSON.stringify(updatedRoot));
     setLoading(false);
-    onClose(false);
+    setIsChange(false);
+    setSelectedFolders([]);
     onRefreshData();
+    onClose(false);
+  };
+
+  const handleMoveImage = async () => {
+    const folders: any = [];
+    const newImage: any = {
+      id: null,
+      type: data?.type,
+      path: data?.path,
+      name: inputName,
+      data: {
+        current_version: data?.data?.current_version,
+        versions: data?.data?.versions,
+      },
+      children: [] as any[],
+    };
+
+    rootData?.children?.map((item) => {
+      console.log(item)
+      const findFolder = selectedFolders?.find((f) => f?.label === item?.name);
+      if (findFolder && !item.children?.find((img) => img.name === newImage.name)) {
+        const newChildren = [...item.children];
+        newChildren.push({
+          ...newImage,
+          id: `${item.id}.${newChildren.length + 1}`,
+        });
+        folders.push({
+          ...item,
+          children: newChildren,
+        });
+      } else {
+        folders.push({
+          ...item,
+          children: [...item.children].filter((img) => img.name !== newImage.name),
+        });
+      }
+    });
+    console.log(folders);
+    await window.electron.updateTreeData(1, JSON.stringify({
+      ...rootData,
+      children: folders
+    }));
+    setSelectedFolders([]);
+    onRefreshData();
+    onClose(false);
   };
 
   useEffect(() => {
     setInputName(data?.name || '');
     setInputCaption(data?.caption || '');
     setQuality(data?.quality || '');
+    if (data?.parent) setSelectedFolders([{ label: data?.parent?.name, value: data?.parent?.id }]);
   }, [data]);
 
+  const foldersOptions = useMemo(() => {
+    const folders = rootData?.children || [];
+    const foldersFormat = folders.map((f, i) => ({ label: f?.name, value: f?.id }));
+    return foldersFormat;
+  }, [rootData]);
+
   return (
-    <Modal isOpen={isOpen} onClose={() => onClose(false)} title="" className="w-2/3 min-h-[500px]">
+    <Modal
+      isOpen={isOpen}
+      onClose={() => {
+        setIsChange(false);
+        setSelectedFolders([]);
+        onClose(false);
+      }}
+      title=""
+      className="w-2/3 min-h-[500px]"
+    >
       <div className="flex space-x-6">
         <div className="w-1/2 space-y-4">
-          <Input value={inputName} onChange={(e) => setInputName(e.target.value)} />
+          <Input
+            value={inputName}
+            onChange={(e) => {
+              setInputName(e.target.value);
+              setIsChange(true);
+            }}
+          />
           <ImageView src={`file://${data?.path}`} />
           <div>
             <Label children="Quality Rating" className="" />
-            <Rating maxStars={5} value={quality} size={7} onChange={setQuality} />
+            <Rating
+              maxStars={5}
+              value={quality}
+              size={7}
+              onChange={(value) => {
+                setQuality(value);
+                setIsChange(true);
+              }}
+            />
           </div>
         </div>
         <div className="w-1/2">
           <Tabs tabs={['Folders', 'Caption']} className="w-full" currentTab={selectedTab} onSelect={setSelectedTab} />
           {selectedTab === 'Folders' && (
             <div className="mt-2 space-y-4">
-              <div>
-                <p className="flex items-center space-x-2">
-                  <Input value={inputFolder} onChange={(e) => setInputFolder(e.target.value)} />
-                  <ButtonOutline className="text-xl" disabled={false} onClick={() => {}}>
-                    <FiFolderPlus />
-                  </ButtonOutline>
-                </p>
+              <div className="flex space-x-1 py-1">
+                {data?.folders?.map((item: string) => (
+                  <Tag value={item} />
+                ))}
               </div>
-              <Tree nodes={folders} currentNode={null} onSelect={() => {}} className="border border-line p-2 rounded-md" />
+              <div className="flex justify-between space-x-2">
+                <MultiSelect options={foldersOptions} values={selectedFolders} onChange={setSelectedFolders} className="w-full" />
+                <ButtonOutline disabled={!selectedFolders?.length} onClick={handleMoveImage}>
+                  Apply
+                </ButtonOutline>
+              </div>
             </div>
           )}
           {selectedTab === 'Caption' && (
@@ -90,7 +168,10 @@ export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose, folders = [],
               </div>
               <Textarea
                 value={inputCaption}
-                onChange={(e) => setInputCaption(e.target.value)}
+                onChange={(e) => {
+                  setInputCaption(e.target.value);
+                  setIsChange(true);
+                }}
                 placeholder="No caption available"
                 className="bg-muted"
               />
@@ -99,13 +180,16 @@ export const ModalImage: FC<ModalImageProps> = ({ isOpen, onClose, folders = [],
         </div>
       </div>
       <div className="mt-6 flex justify-end space-x-2">
-        <ButtonOutline disabled={false} onClick={() => onClose(false)}>
+        <ButtonOutline
+          onClick={() => {
+            setIsChange(false);
+            setSelectedFolders([]);
+            onClose(false);
+          }}
+        >
           Cancel
         </ButtonOutline>
-        <ButtonPrimary
-          disabled={loading}
-          onClick={onSaveChanges}
-        >
+        <ButtonPrimary disabled={loading || !isChange} onClick={onSaveChanges}>
           Save Changes
         </ButtonPrimary>
       </div>

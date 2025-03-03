@@ -1,8 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
-import { FaPencil } from 'react-icons/fa6';
+import { RiDeleteBin6Line, RiPencilFill } from 'react-icons/ri';
 import { FaPlus } from 'react-icons/fa';
-import { Tabs, Tree, Table, Rating, Tag, Input, ButtonPrimary, TreeDragDrop } from '@components';
+import { Tabs, Table, Rating, Tag, Input, ButtonPrimary, TreeDragDrop } from '@components';
 import { ModalImage } from './ModalImage';
 import {
   classNames,
@@ -43,7 +43,7 @@ export const ImageManagementPage: FC = () => {
         window.electron.getImages(),
         window.electron.getFolders(),
       ]);
-      // console.log('root: ', root);
+      console.log('root: ', root);
       // console.log('dataFolders: ', dataFolders);
       // console.log('dataImages: ', dataImages);
       let currentNode = null;
@@ -127,6 +127,12 @@ export const ImageManagementPage: FC = () => {
   };
 
   const handleRemoveFolder = async (node: TreeNode) => {
+    const updatedRoot = deleteById(rootData, node?.id);
+    await window.electron.updateTreeData(1, JSON.stringify(updatedRoot));
+    fetchData();
+  };
+
+	const handleRemoveImage = async (node: TreeNode) => {
     const updatedRoot = deleteById(rootData, node?.id);
     await window.electron.updateTreeData(1, JSON.stringify(updatedRoot));
     fetchData();
@@ -358,12 +364,17 @@ export const ImageManagementPage: FC = () => {
               }}
               actions={[
                 {
-                  label: '',
-                  icon: <FaPencil />,
+                  label: 'Edit Image',
+                  icon: <RiPencilFill />,
                   onClick: (row) => {
                     setSelectedImage(row);
                     setIsModalOpen(true);
                   },
+                },
+								{
+                  label: 'Delete Image',
+                  icon: <RiDeleteBin6Line />,
+                  onClick: (row: any) => handleRemoveImage(row),
                 },
               ]}
             />
