@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { FaPencil } from 'react-icons/fa6';
 import { FaPlus } from 'react-icons/fa';
-import { Tabs, Tree, Table, Rating, Tag, Input, ButtonPrimary } from '@components';
+import { Tabs, Tree, Table, Rating, Tag, Input, ButtonPrimary, TreeDragDrop } from '@components';
 import { ModalImage } from './ModalImage';
 import {
   classNames,
@@ -131,6 +131,72 @@ export const ImageManagementPage: FC = () => {
     fetchData();
   };
 
+  const handleMoveNode = (draggedNode: TreeNode, targetNode: TreeNode) => {
+    const newRootData = { ...rootData };
+    const updatedData = updateNodePosition(newRootData, draggedNode, targetNode);
+    console.log(updatedData);
+  };
+  
+
+  const updateNodePosition = (rootData: TreeNode, draggedNode: TreeNode, targetNode: TreeNode): TreeNode => {
+    const findAndRemoveNode = (nodes: TreeNode[], nodeId: string): TreeNode | null => {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === nodeId) {
+          return nodes.splice(i, 1)[0];
+        }
+      }
+      return null;
+    };
+  
+    const moveNode = (nodes: TreeNode[], draggedNode: TreeNode, targetNode: TreeNode) => {
+
+      if (targetNode.children) {
+        targetNode.children.push(draggedNode);
+        return true;
+      }
+  
+      for (let node of nodes) {
+        if (node.children) {
+          let foundNode = findAndRemoveNode(node.children, draggedNode.id);
+          if (foundNode) {
+            return targetNode.children.push(foundNode);
+          }
+        }
+      }
+      return false;
+    };
+  
+    const newRootData = { ...rootData };
+    const { children } = newRootData;
+  
+    // child -> parent
+    if (children) {
+      let removedNode = null;
+      for (let node of children) {
+        if (node.children) {
+          removedNode = findAndRemoveNode(node.children, draggedNode.id);
+          if (removedNode) {
+            break;
+          }
+        }
+      }
+      if (removedNode) {
+        children.push(removedNode);
+        return newRootData;
+      }
+    }
+  
+    // parent between parent
+    if (children) {
+      if (moveNode(children, draggedNode, targetNode)) {
+        return newRootData;
+      }
+    }
+  
+    return newRootData;
+  };
+  
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -179,7 +245,7 @@ export const ImageManagementPage: FC = () => {
             </div>
           </div>
         )}
-        <Tree
+        <TreeDragDrop
           nodes={rootData?.children}
           currentNode={selectedNode}
           onSelect={(node) => {
@@ -187,11 +253,12 @@ export const ImageManagementPage: FC = () => {
             setSelectedNode(node);
             handleSetImages(node);
           }}
-          className={classNames('', selectedTab === 'Folders' ? '' : 'min-w-60')}
+          className={classNames('h-[calc(100vh-164px)]', selectedTab === 'Folders' ? '' : 'min-w-60')}
           showAction={selectedTab === 'Folders'}
           // quantity={imagesNode?.length}
           onUpdate={handleUpdateFolder}
           onDelete={handleRemoveFolder}
+          onMove={handleMoveNode}
         />
         {selectedTab === 'Images' && (
           <div className="flex-1 px-4">
