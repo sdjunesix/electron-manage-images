@@ -12,7 +12,6 @@ type TreeProps = {
   onSelect: (tab: TreeNode) => void;
   className?: string;
   showAction?: boolean;
-  quantity?: string | number;
   onUpdate?: (node: TreeNode) => void;
   onDelete?: (node: TreeNode) => void;
 };
@@ -23,7 +22,6 @@ export const Tree: FC<TreeProps> = ({
   onSelect,
   className = '',
   showAction = false,
-  quantity = null,
   onUpdate,
   onDelete,
 }) => {
@@ -141,9 +139,7 @@ export const Tree: FC<TreeProps> = ({
                     </span>
                   </>
                 )}
-                {quantity !== null && quantity !== undefined && (
-                  <span className="px-1.5 py-0.5 text-xs rounded bg-muted text-muted_foreground">{quantity}</span>
-                )}
+                <span className="px-1.5 py-0.5 text-xs rounded bg-muted text-muted_foreground">{        <p className='px-1.5 py-0.5 text-xs rounded bg-muted text-muted_foreground'>{children.filter(el => el?.type === 'image')?.length}</p>}</span>
               </div>
             </div>
             {children && expandedNodes[id] && (
@@ -153,7 +149,6 @@ export const Tree: FC<TreeProps> = ({
                 onSelect={onSelect}
                 className={className}
                 showAction={showAction}
-                quantity={quantity}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
               />

@@ -5,49 +5,72 @@ import { Dropdown } from './Dropdown';
 export interface RowData {
   [key: string]: any;
 }
+type HeadersColumn = {
+  title: string;
+  value: string;
+  width?: number;
+};
 type Formatter = (value: any) => any;
 export type Action = { label: string; icon?: JSX.Element; onClick: (row: RowData) => void };
 type TableProps = {
   rows: RowData[];
   className?: string;
-  hiddenColumns?: string[];
   formatters?: Record<string, Formatter>;
   actions?: Action[];
   isRounded?: boolean;
+  headers: HeadersColumn[];
 };
 
-export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns = [], formatters = {}, actions = [] }) => {
+export const Table: FC<TableProps> = ({ rows = [], className = '', formatters = {}, actions = [], isRounded = true, headers }) => {
   if (!rows.length) return <p className="text-center p-4">No data available</p>;
-
-  const columns: string[] = useMemo(() => Object.keys(rows[0]).filter((col) => !hiddenColumns.includes(col)), [rows]);
 
   return (
     <div className={classNames('text-sm overflow-x-auto', className)}>
       <table className="w-full text-left">
         <thead className="bg-muted_50">
           <tr>
-            {columns.map((col: any, index: number) => {
+            {headers.map((col: HeadersColumn, index: number) => {
               return (
                 <th
                   key={index}
                   scope="col"
-                  className="cursor-pointer px-4 py-2.5 text-muted_foreground hover:bg-muted capitalize rounded-t-lg whitespace-nowrap"
+                  className={classNames(
+                    'cursor-pointer px-4 py-2.5 text-muted_foreground hover:bg-muted capitalize whitespace-nowrap',
+                    isRounded && index === 0 ? 'rounded-tl-lg' : '',
+                    isRounded && headers.length - 1 && !actions.length ? 'rounded-tr-lg' : ''
+                  )}
                 >
-                  {col}
+                  {col.title}
                 </th>
               );
             })}
-            {actions.length > 0 && <th className="cursor-pointer px-4 py-2.5 text-muted_foreground hover:bg-muted">Actions</th>}
+            {actions.length > 0 && (
+              <th
+                className={classNames(
+                  'cursor-pointer px-4 py-2.5 text-muted_foreground hover:bg-muted',
+                  isRounded ? 'rounded-tr-lg' : ''
+                )}
+              >
+                Actions
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
           {rows.map((row: any, index: number) => {
             return (
               <tr key={index} className="bg-white cursor-pointer border-t border-line hover:bg-muted_50">
-                {columns.map((col: any, idx: number) => {
-                  const value = formatters[col] ? formatters[col](row[col]) : row[col];
+                {headers.map((col: HeadersColumn, idx: number) => {
+                  const value = formatters[col.value] ? formatters[col.value](row[col.value]) : row[col.value];
                   const element = (
-                    <td key={idx} className="px-4 py-2 rounded-bl-lg">
+                    <td
+                      key={idx}
+                      className={classNames(
+                        'px-4 py-2',
+                        rows?.length - 1 === index && isRounded && idx === 0 ? 'rounded-bl-lg' : '',
+                        rows?.length - 1 === index && isRounded && headers.length - 1 && !actions.length ? 'rounded-br-lg' : ''
+                      )}
+                    >
                       {value}
                     </td>
                   );
@@ -62,10 +85,19 @@ export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns
                     return element;
                   }
 
-                  return <td key={idx} className="px-4 py-2 rounded-bl-lg"></td>;
+                  return (
+                    <td
+                      key={idx}
+                      className={classNames(
+                        'px-4 py-2',
+                        rows?.length - 1 === index && isRounded && idx === 0 ? 'rounded-bl-lg' : '',
+                        rows?.length - 1 === index && isRounded && headers.length - 1 && !actions.length ? 'rounded-br-lg' : ''
+                      )}
+                    ></td>
+                  );
                 })}
                 {actions.length > 0 && (
-                  <td className="px-4 py-2 rounded-br-lg">
+                  <td className={classNames('px-4 py-2', rows?.length - 1 === index && isRounded ? 'rounded-br-lg' : '')}>
                     {actions.length === 1 ? (
                       <button
                         className="px-2.5 h-8 rounded-md hover:bg-accent hover:text-white flex items-center justify-center space-x-2"
@@ -75,7 +107,11 @@ export const Table: FC<TableProps> = ({ rows = [], className = '', hiddenColumns
                         {actions[0].label && <span>{actions[0].label}</span>}
                       </button>
                     ) : (
-                      <Dropdown actions={actions} value={row} />
+                      <Dropdown
+                        actions={actions}
+                        value={row}
+                        position={rows?.length - 1 === index || rows?.length - 2 === index ? 'top-left' : 'bottom-left'}
+                      />
                     )}
                   </td>
                 )}

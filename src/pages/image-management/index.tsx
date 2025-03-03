@@ -132,7 +132,7 @@ export const ImageManagementPage: FC = () => {
     fetchData();
   };
 
-	const handleRemoveImage = async (node: TreeNode) => {
+  const handleRemoveImage = async (node: TreeNode) => {
     const updatedRoot = deleteById(rootData, node?.id);
     await window.electron.updateTreeData(1, JSON.stringify(updatedRoot));
     fetchData();
@@ -334,19 +334,26 @@ export const ImageManagementPage: FC = () => {
           }}
           className={classNames('h-[calc(100vh-164px)]', selectedTab === 'Folders' ? '' : 'min-w-60')}
           showAction={selectedTab === 'Folders'}
-          // quantity={imagesNode?.length}
           onUpdate={handleUpdateFolder}
           onDelete={handleRemoveFolder}
           onMove={handleMoveNode}
         />
         {selectedTab === 'Images' && (
-          <div className="flex-1 px-4">
+          <div className="flex-1 px-4 w-[calc(100%-220px)]">
             <p className="mb-4 p-3 text-muted_foreground bg-muted/50 rounded-lg">
               Showing <span className="text-black">{imagesNode?.length}</span> images
             </p>
             <Table
               rows={imagesNode}
-              hiddenColumns={['id', 'type', 'path', 'data', 'children']}
+              headers={[
+                { title: 'Name', value: 'name' },
+                { title: 'Date Added', value: 'date_added' },
+                { title: 'Folders', value: 'folders' },
+                { title: 'Captions', value: 'caption' },
+                { title: 'Version', value: 'version' },
+                { title: 'Quality', value: 'quality' },
+              ]}
+              isRounded={false}
               formatters={{
                 date_added: (value: any) => dayjs(value).format('D/M/YYYY'),
                 quality: (value: any) => <Rating value={value} notHover size={4} />,
@@ -371,7 +378,7 @@ export const ImageManagementPage: FC = () => {
                     setIsModalOpen(true);
                   },
                 },
-								{
+                {
                   label: 'Delete Image',
                   icon: <RiDeleteBin6Line />,
                   onClick: (row: any) => handleRemoveImage(row),

@@ -12,7 +12,6 @@ type TreeDragDropProps = {
   onSelect: (tab: TreeNode) => void;
   className?: string;
   showAction?: boolean;
-  quantity?: string | number;
   onUpdate?: (node: TreeNode) => void;
   onDelete?: (node: TreeNode) => void;
   onMove?: (draggedNode: TreeNode, targetNode: TreeNode, position: 'above' | 'below' | 'inside') => void;
@@ -24,7 +23,6 @@ export const TreeDragDrop: FC<TreeDragDropProps> = ({
   onSelect,
   className = '',
   showAction = false,
-  quantity = null,
   onUpdate,
   onDelete,
   onMove,
@@ -49,7 +47,6 @@ export const TreeDragDrop: FC<TreeDragDropProps> = ({
           expandedNodes={expandedNodes}
           toggleNode={toggleNode}
           showAction={showAction}
-          quantity={quantity}
           onUpdate={onUpdate}
           onDelete={onDelete}
           onMove={onMove}
@@ -68,7 +65,6 @@ type TreeItemProps = {
   expandedNodes: { [key: string]: boolean };
   toggleNode: (id: string) => void;
   showAction: boolean;
-  quantity?: string | number;
   onUpdate?: (node: TreeNode) => void;
   onDelete?: (node: TreeNode) => void;
   onMove?: (draggedNode: TreeNode, targetNode: TreeNode, position: 'above' | 'below' | 'inside') => void;
@@ -83,7 +79,6 @@ export const TreeItem: FC<TreeItemProps> = ({
   expandedNodes,
   toggleNode,
   showAction,
-  quantity,
   onUpdate,
   onDelete,
   onMove,
@@ -284,6 +279,7 @@ export const TreeItem: FC<TreeItemProps> = ({
             </span>
           </div>
         )}
+        <p className='px-1.5 py-0.5 text-xs rounded bg-muted text-muted_foreground'>{children.filter(el => el?.type === 'image')?.length}</p>
       </div>
       {children && expandedNodes[id] && (
         <ul>
@@ -296,7 +292,6 @@ export const TreeItem: FC<TreeItemProps> = ({
               expandedNodes={expandedNodes}
               toggleNode={toggleNode}
               showAction={showAction}
-              quantity={quantity}
               onUpdate={onUpdate}
               onDelete={onDelete}
               onMove={onMove}
