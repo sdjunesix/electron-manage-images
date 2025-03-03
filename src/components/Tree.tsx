@@ -91,7 +91,7 @@ export const Tree: FC<TreeProps> = ({
                 )}
               </div>
               <div className="flex items-center space-x-2">
-                {showAction && (
+                {showAction && name !== 'Unassigned' && (
                   <>
                     {editNodeId === id ? (
                       <>
