@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import { FaPencil } from 'react-icons/fa6';
 import { FaPlus } from 'react-icons/fa';
-import { Tabs, Tree, Table, Rating, Tag, Input, ButtonPrimary } from '@components';
+import { Tabs, Tree, Table, Rating, Tag, Input, ButtonPrimary, TreeDragDrop } from '@components';
 import { ModalImage } from './ModalImage';
 import {
   classNames,
@@ -22,7 +22,7 @@ import { orderBy } from 'lodash';
 export const ImageManagementPage: FC = () => {
   const [rootData, setRootData] = useState<TreeNode | null>(null);
   const [rootFolder, setRootFolder] = useState<string | null>(null);
-  const [selectedTab, setSelectedTab] = useState('Images');
+  const [selectedTab, setSelectedTab] = useState('Folders');
   const [selectedNode, setSelectedNode] = useState(null);
   const [imagesNode, setImagesNode] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -131,6 +131,137 @@ export const ImageManagementPage: FC = () => {
     fetchData();
   };
 
+  const handleMoveNode = async (draggedNode: TreeNode, targetNode: TreeNode, position: 'above' | 'below' | 'inside') => {
+    if (draggedNode.name === 'Unassigned') return;
+    if (position === 'inside' && targetNode.name === 'Unassigned') return;
+    if (position === 'above' && targetNode.name === 'Unassigned') return;
+
+    // const unassignedIndex = rootData.children.findIndex((node) => node.name === 'Unassigned');
+    // if (unassignedIndex !== -1 && unassignedIndex + 1 < rootData.children.length) {
+    //   const nodeAfterUnassigned = rootData.children[unassignedIndex + 1];
+    //   if (nodeAfterUnassigned.id === targetNode.id && position === 'above') return;
+    // }
+
+    if (position === 'inside') {
+			const targetLevel = targetNode.id.split('.').length;
+			console.log(targetNode.id, targetLevel)
+      if (targetLevel > 1 && draggedNode.children && draggedNode.children.length > 0) return;
+    }
+
+    const newTreeData = [...rootData.children];
+
+    // Function to find and delete node dragged from current position
+    const removeNode = (nodes: TreeNode[]): [TreeNode[], TreeNode | null] => {
+      let removedNode: TreeNode | null = null;
+      let result = [...nodes];
+
+      const index = result.findIndex((node) => node.id === draggedNode.id);
+      if (index > -1) {
+        removedNode = { ...result[index] };
+        result.splice(index, 1);
+        return [result, removedNode];
+      }
+
+      for (let i = 0; i < result.length; i++) {
+        if (result[i].children && result[i].children.length > 0) {
+          const [newChildren, found] = removeNode(result[i].children);
+          if (found) {
+            result[i] = { ...result[i], children: newChildren };
+            return [result, found];
+          }
+        }
+      }
+
+      return [result, null];
+    };
+
+    // Function to insert node into new position
+    const insertNode = (nodes: TreeNode[]): TreeNode[] => {
+      if (position === 'inside') {
+        return nodes.map((node) => {
+          if (node.id === targetNode.id) {
+            return {
+              ...node,
+              children: node.children ? [...node.children, draggedNode] : [draggedNode],
+            };
+          }
+
+          if (node.children && node.children.length > 0) {
+            return {
+              ...node,
+              children: insertNode(node.children),
+            };
+          }
+
+          return node;
+        });
+      }
+
+      let result = [...nodes];
+      const targetIndex = result.findIndex((node) => node.id === targetNode.id);
+
+      if (targetIndex > -1) {
+        const insertIndex = position === 'below' ? targetIndex + 1 : targetIndex;
+        result.splice(insertIndex, 0, draggedNode);
+        return result;
+      }
+
+      return result.map((node) => {
+        if (node.children && node.children.length > 0) {
+          return {
+            ...node,
+            children: insertNode(node.children),
+          };
+        }
+        return node;
+      });
+    };
+
+    const updateAllIds = (nodes: TreeNode[], parentId = ''): TreeNode[] => {
+      if (!nodes || !Array.isArray(nodes)) return nodes;
+
+      let sortedNodes = [...nodes];
+      if (parentId === '') {
+        const unassignedIdx = sortedNodes.findIndex((node) => node.name === 'Unassigned');
+        if (unassignedIdx > 0) {
+          const unassignedNode = sortedNodes.splice(unassignedIdx, 1)[0];
+          sortedNodes.unshift(unassignedNode);
+        }
+      }
+
+      return sortedNodes.map((node, index) => {
+        const nodeClone = { ...node };
+        const positionIndex = index + 1;
+        const newId = parentId ? `${parentId}.${positionIndex}` : `${positionIndex}`;
+
+        nodeClone.id = newId;
+
+        if (nodeClone.children && nodeClone.children.length > 0) {
+          nodeClone.children = updateAllIds(nodeClone.children, newId);
+        }
+
+        return nodeClone;
+      });
+    };
+
+    // Remove the dragged node from its old position
+    const [dataAfterRemoval, removedNode] = removeNode(newTreeData);
+
+    if (!removedNode) return;
+
+    // Reset the dragged node to ensure there are no references to the old object
+    draggedNode = removedNode;
+
+    // Insert node into new position
+    const finalData = insertNode(dataAfterRemoval);
+    const updatedData = updateAllIds(finalData);
+
+    const updatedRoot = { ...rootData, children: updatedData };
+    console.log(updatedRoot);
+    await window.electron.updateTreeData(1, JSON.stringify(updatedRoot));
+    fetchData();
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -179,7 +310,7 @@ export const ImageManagementPage: FC = () => {
             </div>
           </div>
         )}
-        <Tree
+        <TreeDragDrop
           nodes={rootData?.children}
           currentNode={selectedNode}
           onSelect={(node) => {
@@ -187,11 +318,12 @@ export const ImageManagementPage: FC = () => {
             setSelectedNode(node);
             handleSetImages(node);
           }}
-          className={classNames('', selectedTab === 'Folders' ? '' : 'min-w-60')}
+          className={classNames('h-[calc(100vh-164px)]', selectedTab === 'Folders' ? '' : 'min-w-60')}
           showAction={selectedTab === 'Folders'}
           // quantity={imagesNode?.length}
           onUpdate={handleUpdateFolder}
           onDelete={handleRemoveFolder}
+          onMove={handleMoveNode}
         />
         {selectedTab === 'Images' && (
           <div className="flex-1 px-4">
