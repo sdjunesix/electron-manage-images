@@ -18,40 +18,16 @@ let db = new sqlite3.Database(`${process.cwd()}/src/sqlite3.db`, (err: any) => {
 
 // Initialize database
 async function initDatabase() {
-  // Create the `images` table based on the `Image` interface
+  // Create the `tree` table
   await db.exec(`
-    CREATE TABLE IF NOT EXISTS images (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      dateAdded TIMESTAMP NOT NULL,
-      savedFolder TEXT,
-      version INTEGER NOT NULL
-    );
-  `);
-
-  // Create the `image_versions` table to store multiple versions of images
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS image_versions (
-      version_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      image_id TEXT NOT NULL,
-      version INTEGER NOT NULL,
-      quality INTEGER NOT NULL CHECK (quality >= 1 AND quality <= 100),
-      dateAdded TIMESTAMP NOT NULL,
-      caption TEXT,
-      folder TEXT,
-      FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE
-    );
-  `);
-
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS tree_nodes (
+    CREATE TABLE IF NOT EXISTS tree (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      tree_id INTEGER NOT NULL,
-      parent_id INTEGER,
-      value TEXT NOT NULL,
-      FOREIGN KEY (parent_id) REFERENCES tree_nodes(id) ON DELETE CASCADE
+      data TEXT NOT NULL,
+      name TEXT,
+      path TEXT
     );
   `);
+
   console.log("Database initialized.");
 }
 
@@ -64,5 +40,7 @@ async function main() {
     console.error('Error initializing database:', error);
   }
 }
+
+export {db, initDatabase}
 
 main();

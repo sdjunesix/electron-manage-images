@@ -1,0 +1,68 @@
+{
+    "id": "",
+    "type": "root",
+    "path": "/Users/sdjune6/ws/electron-manage-images",
+    "name": "Root Folder Galaxy",
+    "data": {},
+    "children": [
+        { 
+            "id": "1",
+            "type": "folder",
+            "path": "/Users/sdjune6/ws/electron-manage-images/unassigned",
+            "name": "Unassigned",
+            "data": {},
+            "children": [
+                {
+                    "id": "1.1",
+                    "type": "image",
+                    "path": "/Users/sdjune6/ws/electron-manage-images",
+                    "name": "Root Folder Galaxy",
+                    "data": {
+                        "current_version": "v1.3",
+                        "versions": {
+                            "v1.3": {
+                                "quality": 4,
+                                "caption": "This is caption",
+                                "createdAt": "2025 Feb 27"
+                            }
+                        }
+                    },
+                    "children": []
+                }
+            ]
+        },
+        {
+            "id": "2",
+            "type": "folder",
+            "path": "/Users/sdjune6/ws/electron-manage-images",
+            "name": "Iterator",
+            "children": [
+                {
+                    "id": "2.1",
+                    "type": "folder",
+                    "path": "/Users/sdjune6/ws/electron-manage-images",
+                    "name": "Rooms",
+                    "children": [
+                        {
+                            "id": "2.1.1",
+                            "type": "image",
+                            "path": "/Users/sdjune6/ws/electron-manage-images",
+                            "name": "Image 1",
+                            "data": {
+                                "current_version": "v1.3",
+                                "versions": {
+                                    "v1.3": {
+                                        "quality": 4,
+                                        "caption": "This is caption",
+                                        "createdAt": "2025 Feb 27"
+                                    }
+                                }
+                            },
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -26,10 +26,10 @@
  * ```
  */
 // Add this to the end of the existing file
-import './app';
+import './index';
 import './index.css';
 
-document.getElementById('drag').ondragstart = (event) => {
-  event.preventDefault()
-}
+// document.getElementById('drag').ondragstart = (event) => {
+//   event.preventDefault()
+// }
 

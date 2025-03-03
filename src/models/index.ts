@@ -11,3 +11,12 @@ export interface Image {
 export interface Node {
   
 }
+
+export interface TreeNode {
+  id: string;
+  type: string;
+  path: string;
+  name: string;
+  data?: Record<string, any>;
+  children?: TreeNode[];
+};
