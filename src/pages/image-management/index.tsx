@@ -136,10 +136,16 @@ export const ImageManagementPage: FC = () => {
     if (position === 'inside' && targetNode.name === 'Unassigned') return;
     if (position === 'above' && targetNode.name === 'Unassigned') return;
 
-    const unassignedIndex = rootData.children.findIndex((node) => node.name === 'Unassigned');
-    if (unassignedIndex !== -1 && unassignedIndex + 1 < rootData.children.length) {
-      const nodeAfterUnassigned = rootData.children[unassignedIndex + 1];
-      if (nodeAfterUnassigned.id === targetNode.id && position === 'above') return;
+    // const unassignedIndex = rootData.children.findIndex((node) => node.name === 'Unassigned');
+    // if (unassignedIndex !== -1 && unassignedIndex + 1 < rootData.children.length) {
+    //   const nodeAfterUnassigned = rootData.children[unassignedIndex + 1];
+    //   if (nodeAfterUnassigned.id === targetNode.id && position === 'above') return;
+    // }
+
+    if (position === 'inside') {
+			const targetLevel = targetNode.id.split('.').length;
+			console.log(targetNode.id, targetLevel)
+      if (targetLevel > 1 && draggedNode.children && draggedNode.children.length > 0) return;
     }
 
     const newTreeData = [...rootData.children];
