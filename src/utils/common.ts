@@ -1,4 +1,5 @@
 import { Image, Node, TreeNode } from '../models';
+import { RootNode } from './fileSystemTree';
 
 export function addObject(obj: any, targetId: string, newObject: any): any {
   if (Array.isArray(obj)) {

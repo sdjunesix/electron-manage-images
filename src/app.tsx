@@ -7,7 +7,7 @@ declare global {
   interface Window {
     electron: {
       getRootFolder: () => Promise<TreeNode | null>;
-      selectFolder: () => Promise<string | null>;
+      selectFolder: () => Promise<any | null>;
       selectFiles: () => Promise<string[]>;
       moveFiles: (files: string[], rootFolder: string) => Promise<{ success: boolean; movedFiles?: string[]; error?: string }>;
 

@@ -52,7 +52,7 @@ export const ImageManagementPage: FC = () => {
         handleSetImages(currentNode);
         setSelectedNode(currentNode);
       }
-      setRootData(root);
+      // setRootData(root);
       setFolders(dataFolders);
       setImages(dataImages);
     } catch (error) {
@@ -74,10 +74,12 @@ export const ImageManagementPage: FC = () => {
   };
 
   const handleSelectFolder = async () => {
-    const path = await selectFolder();
-    if (path) {
+    const {path, rootNode} = await selectFolder();
+
+    setRootData(rootNode);
+    // if (path) {
       setRootFolder(path);
-    }
+    // }
   };
 
   const handleSelectFiles = async () => {

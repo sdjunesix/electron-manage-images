@@ -5,7 +5,7 @@ export const getRootFolder = async (): Promise<TreeNode | null> => {
   return row || null;
 };
 
-export const selectFolder = async (): Promise<string | null> => {
+export const selectFolder = async (): Promise<any | null> => {
   const path = await window.electron.selectFolder();
   return path || null;
 };

@@ -15,6 +15,9 @@ import {
   updateTree
 } from './utils/common'
 
+import { selectRootFolder, scanRootFolder } from './utils/fileSystemScaner';
+import { TreeNode } from './models';
+
 let mainWindow: BrowserWindow;
 
 if (started) {
@@ -106,22 +109,42 @@ ipcMain.handle('get-root-folder', async () => {
   });
 });
 
-// select root folder & set root folder
+// // select root folder & set root folder
+// ipcMain.handle('select-folder', async () => {
+//   const result = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory'] });
+//   const path = result.filePaths[0] || null;
+
+//   if (path) {
+//     db.run('UPDATE tree SET path = ? WHERE id = ?', [path, 1], (err: any, row: any) => {
+//       if (err) {
+//         console.error('Error closing database:', err.message);
+//       } else {
+//         console.log('Database closed successfully');
+//       }
+//     })
+//   }
+
+//   return path;
+// });
 ipcMain.handle('select-folder', async () => {
-  const result = await dialog.showOpenDialog(mainWindow, { properties: ['openDirectory'] });
-  const path = result.filePaths[0] || null;
-
-  if (path) {
-    db.run('UPDATE tree SET path = ? WHERE id = ?', [path, 1], (err: any, row: any) => {
-      if (err) {
-        console.error('Error closing database:', err.message);
-      } else {
-        console.log('Database closed successfully');
-      }
-    })
+  const folderPath = await selectRootFolder();
+  if (folderPath) {
+    const currentTree: TreeNode = scanRootFolder(folderPath);
+    const data = JSON.stringify(currentTree);
+    // console.log('OMGGGGGG')
+    console.dir(data, {depth: null})
+    return {
+      success: true,
+      path: folderPath,
+      rootNode: currentTree,
+      // stats: {
+      //   totalItems: currentTree.countDescendants() + 1,
+      //   imageCount: currentTree.getAllImages().length,
+      //   folderCount: currentTree.countDescendants() + 1 - currentTree.getAllImages().length
+      // }
+    };
   }
-
-  return path;
+  return { success: false };
 });
 
 ipcMain.handle('select-files', async () => {
