@@ -91,5 +91,8 @@ typings/
 # Electron-Forge
 out/
 
-#OSX
+# OSX
 .DS_Store
+
+# db dev
+# sqlite3.db

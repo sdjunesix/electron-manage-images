@@ -36,7 +36,7 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
-  mainWindow.webContents.openDevTools();
+  // if (process.env.NODE_ENV === 'development') mainWindow.webContents.openDevTools();
 };
 
 app.on('ready', async () => {
@@ -112,7 +112,7 @@ ipcMain.handle('select-folder', async () => {
   const path = result.filePaths[0] || null;
 
   if (path) {
-    db.get('UPDATE tree SET path = ? WHERE id = ?', [path, 1], (err: any, row: any) => {
+    db.run('UPDATE tree SET path = ? WHERE id = ?', [path, 1], (err: any, row: any) => {
       if (err) {
         console.error('Error closing database:', err.message);
       } else {
@@ -158,7 +158,7 @@ ipcMain.handle('move-files', async (_, files, rootFolder) => {
     const destination = path.join(rootFolder, fileName);
 
     try {
-      fs.renameSync(file, destination);
+      fs.copyFileSync(file, destination);
       movedFiles.push(destination);
     } catch (error) {
       console.error(`Error moving file ${file}:`, error);
@@ -283,3 +283,32 @@ ipcMain.handle('get-folders', async () => {
 //     });
 //   });
 // });
+
+// Get images from folder selected
+ipcMain.handle('get-images-from-folder', async (_, folderPath) => {
+  try {
+    if (!fs.existsSync(folderPath)) {
+      console.error('Folder does not exist:', folderPath);
+      return [];
+    }
+
+    const files = fs.readdirSync(folderPath);
+    console.log(files)
+    const imageExtensions = [
+      '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff', '.tif', 
+      '.heic', '.heif',
+      '.raw', '.arw', '.cr2', '.nef', '.orf', '.rw2',
+      '.ico', '.avif', '.jfif',
+    ];
+    
+    const imageFiles = files.filter(file => {
+      const ext = path.extname(file).toLowerCase().replace('.', '');
+      return imageExtensions.includes(ext);
+    });
+    
+    return imageFiles.map(file => path.join(folderPath, file));
+  } catch (error) {
+    console.error('Error read folder images:', error);
+    return [];
+  }
+});

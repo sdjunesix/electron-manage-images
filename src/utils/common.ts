@@ -170,6 +170,6 @@ export function getFilenameWithoutExtension(filePath: string): string {
     filePath
       .split('/')
       .pop()
-      ?.replace(/\.png$/, '') ?? ''
+      .split('.')?.[0] || 'image'
   );
 }

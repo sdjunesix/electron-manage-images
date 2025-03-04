@@ -20,4 +20,5 @@ contextBridge.exposeInMainWorld('electron', {
   updateImageCaption: (obj: any, targetId: string, newObject: any) => ipcRenderer.invoke('update-image-caption', obj, targetId, newObject),
   updateImageVersion: (obj: any, targetId: string, newObject: any) => ipcRenderer.invoke('update-image-version', obj, targetId, newObject),
 
+  getImagesFromFolder: (folderPath: string) => ipcRenderer.invoke('get-images-from-folder'),
 });

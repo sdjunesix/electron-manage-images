@@ -13,3 +13,4 @@ export * from './Tag';
 export * from './Tabs';
 export * from './Textarea';
 export * from './Tree';
+export * from './TreeDragDrop';

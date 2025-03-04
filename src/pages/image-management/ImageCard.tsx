@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC } from 'react';
 import { FaCheck } from 'react-icons/fa';
 import { ImageView, Rating, Tag } from '@components';
 
@@ -12,19 +12,6 @@ interface ImageCardProps {
 }
 
 const ImageCard: FC<ImageCardProps> = ({ src, title, tags = [], version, rating, onClick }) => {
-  // const [imgPath, setImgPath] = useState<string>();
-
-  // useEffect(() => {
-  //   if (!src) return;
-
-  //   const handleSelectImage = async () => {
-  //     const response = await fetch(`file://${src}`);
-  //     const blob = await response.blob();
-  //     setImgPath(URL.createObjectURL(blob));
-  //   };
-    
-  //   handleSelectImage();
-  // }, [src]);
 
   return (
     <div className="relative group cursor-pointer" onClick={onClick}>
