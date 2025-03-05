@@ -3,6 +3,7 @@ import path from 'node:path';
 import fs from 'fs';
 import started from 'electron-squirrel-startup';
 import * as dotenv from 'dotenv';
+import DatabaseManager from './database';
 import { db, initDatabase } from './init-db';
 import {  
   addObject,
@@ -47,7 +48,10 @@ const createWindow = () => {
 
 app.on('ready', async () => {
   try {
-    await initDatabase();
+    // await initDatabase();
+    console.log('Initializing database...');
+    DatabaseManager.initialize();
+    console.log('Database initialized successfully');
     createWindow();
   } catch (error) {
     console.error("Error create table db:", error);
