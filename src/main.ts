@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'node:path';
 import fs from 'fs';
 import started from 'electron-squirrel-startup';
+import * as dotenv from 'dotenv';
 import { db, initDatabase } from './init-db';
 import {  
   addObject,
@@ -14,11 +15,13 @@ import {
   getFolders,
   updateTree
 } from './utils/common'
-
 import { selectRootFolder, scanRootFolder } from './utils/fileSystemScaner';
 import { TreeNode } from './models';
 
+const envPath = path.resolve(__dirname, `.env.${process.env.NODE_ENV || "development"}`);
 let mainWindow: BrowserWindow;
+
+dotenv.config({ path: envPath });
 
 if (started) {
   app.quit();
@@ -39,7 +42,7 @@ const createWindow = () => {
     mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
   }
 
-  // if (process.env.NODE_ENV === 'development') mainWindow.webContents.openDevTools();
+  if (process.env.NODE_ENV === 'development') mainWindow.webContents.openDevTools();
 };
 
 app.on('ready', async () => {
