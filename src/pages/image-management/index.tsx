@@ -151,11 +151,11 @@ export const ImageManagementPage: FC = () => {
     //   if (nodeAfterUnassigned.id === targetNode.id && position === 'above') return;
     // }
 
-    if (position === 'inside') {
-      const targetLevel = targetNode.id.split('.').length;
-      console.log(targetNode.id, targetLevel);
-      if (targetLevel > 1 && draggedNode.children && draggedNode.children.length > 0) return;
-    }
+    // if (position === 'inside') {
+    //   const targetLevel = targetNode.id.split('.').length;
+    //   console.log(targetNode.id, targetLevel);
+    //   if (targetLevel > 1 && draggedNode.children && draggedNode.children.length > 0) return;
+    // }
 
     const newTreeData = [...rootData.children];
 

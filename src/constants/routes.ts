@@ -1,8 +1,9 @@
-import { HomePage } from '@pages/home';
 import { ImageManagementPage } from '@pages/image-management';
 import { CaptionManagementPage } from '@pages/cation-management';
+import { TrainingPage } from '@pages/training';
+import { QualityManagementPage } from '@pages/quality-management';
+import { SettingsPage } from '@pages/settings';
 
-import { IoHomeOutline } from 'react-icons/io5';
 import { CiImageOn } from 'react-icons/ci';
 import { FiMessageSquare } from 'react-icons/fi';
 import { HiMiniPaintBrush } from 'react-icons/hi2';
@@ -12,12 +13,6 @@ import { IoMdSettings } from 'react-icons/io';
 export const ROUTES = [
   {
     path: '/',
-    title: 'Home',
-    Icon: IoHomeOutline,
-    Component: HomePage,
-  },
-  {
-    path: '/images',
     title: 'Image Management',
     Icon: CiImageOn,
     Component: ImageManagementPage,
@@ -32,18 +27,18 @@ export const ROUTES = [
     path: '/training',
     title: 'Training',
     Icon: HiMiniPaintBrush,
-    Component: CaptionManagementPage,
+    Component: TrainingPage,
   },
   {
     path: '/quality',
     title: 'Quality Management',
     Icon: IoShieldOutline,
-    Component: CaptionManagementPage,
+    Component: QualityManagementPage,
   },
   {
     path: '/settings',
     title: 'Settings',
     Icon: IoMdSettings,
-    Component: CaptionManagementPage,
+    Component: SettingsPage,
   },
 ];
