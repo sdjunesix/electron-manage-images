@@ -11,7 +11,15 @@ declare global {
       selectFiles: () => Promise<string[]>;
       moveFiles: (files: string[], rootFolder: string) => Promise<{ success: boolean; movedFiles?: string[]; error?: string }>;
 
-      setRootFolder: () => any;
+      setRootFolder: (path: string) => Promise<any | null>;
+      reScanRootFolder: (path: string) => Promise<any | null>;
+      getRootFolders: () => Promise<any | null>;
+      getSubfolders: (folderId: number) => Promise<any | null>;
+      isDirectory: (path: string) => Promise<any | null>;
+      getDirectSubfolders: (folderId: number) => Promise<any | null>;
+      getFolderById: (folderId: number) => Promise<any | null>;
+      getImagesByFolder: (folderId: number) => Promise<any | null>;
+      getFolderTree: (folderId: number) => Promise<any | null>;
 
       updateCaption: (imageId: string, newCaption: string) => Promise<{ success: boolean }>;
       updateQuality: (imageId: string, newQuality: number) => Promise<{ success: boolean }>;

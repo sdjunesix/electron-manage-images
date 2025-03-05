@@ -1,5 +1,4 @@
-// src/database/repositories/CaptionRepository.ts
-import DatabaseManager from '../index';
+import {db} from '../index';
 
 interface CaptionData {
   id?: number;
@@ -13,13 +12,11 @@ interface CaptionData {
 }
 
 class CaptionRepository {
-  private db = DatabaseManager.getDatabase();
-
   /**
    * Thêm caption mới hoặc cập nhật caption đã tồn tại
    */
   addOrUpdateCaption(captionData: CaptionData): number {
-    const stmt = this.db.prepare(`
+    const stmt = db.prepare(`
       INSERT OR REPLACE INTO image_captions 
       (image_id, ai_service, caption_text, generation_date, is_manual, confidence_score, prompt_used)
       VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -42,7 +39,7 @@ class CaptionRepository {
    * Lấy caption cho một hình ảnh
    */
   getByImageId(imageId: number): CaptionData | null {
-    const stmt = this.db.prepare('SELECT * FROM image_captions WHERE image_id = ? ORDER BY generation_date DESC LIMIT 1');
+    const stmt = db.prepare('SELECT * FROM image_captions WHERE image_id = ? ORDER BY generation_date DESC LIMIT 1');
     return stmt.get(imageId) as CaptionData | null;
   }
 
@@ -50,7 +47,7 @@ class CaptionRepository {
    * Lấy tất cả caption cho một hình ảnh
    */
   getAllByImageId(imageId: number): CaptionData[] {
-    const stmt = this.db.prepare('SELECT * FROM image_captions WHERE image_id = ? ORDER BY generation_date DESC');
+    const stmt = db.prepare('SELECT * FROM image_captions WHERE image_id = ? ORDER BY generation_date DESC');
     return stmt.all(imageId) as CaptionData[];
   }
 
@@ -58,7 +55,7 @@ class CaptionRepository {
    * Xóa caption của một hình ảnh
    */
   deleteByImageId(imageId: number): void {
-    const stmt = this.db.prepare('DELETE FROM image_captions WHERE image_id = ?');
+    const stmt = db.prepare('DELETE FROM image_captions WHERE image_id = ?');
     stmt.run(imageId);
   }
 
@@ -66,7 +63,7 @@ class CaptionRepository {
    * Xóa caption theo ID
    */
   deleteById(captionId: number): void {
-    const stmt = this.db.prepare('DELETE FROM image_captions WHERE id = ?');
+    const stmt = db.prepare('DELETE FROM image_captions WHERE id = ?');
     stmt.run(captionId);
   }
 
@@ -74,7 +71,7 @@ class CaptionRepository {
    * Thống kê số lượng caption đã sinh theo dịch vụ AI
    */
   countByAIService(aiService: string): number {
-    const stmt = this.db.prepare('SELECT COUNT(*) as count FROM image_captions WHERE ai_service = ?');
+    const stmt = db.prepare('SELECT COUNT(*) as count FROM image_captions WHERE ai_service = ?');
     const result = stmt.get(aiService) as { count: number };
     return result.count;
   }

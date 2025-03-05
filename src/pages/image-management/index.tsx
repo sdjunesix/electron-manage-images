@@ -15,7 +15,7 @@ import {
   deleteById,
 } from '@utils';
 import ImageCard from './ImageCard';
-import { getRootFolder, selectFiles, selectFolder } from '@services';
+import { getRootFolder, getRootFolders, selectFiles, selectFolder } from '@services';
 import { TreeNode } from '@models/index';
 import { orderBy } from 'lodash';
 
@@ -32,8 +32,10 @@ export const ImageManagementPage: FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
 
   const fetchRootFolder = async () => {
-    const rootNode: TreeNode = await getRootFolder();
-    if (rootNode) setRootFolder(rootNode.path);
+    const rootFolder: TreeNode = await getRootFolders();
+    if (rootFolder && rootFolder.data?.[0]?.full_path) {
+      setRootFolder(rootFolder.data?.[0]?.full_path);
+    }
   };
 
   const fetchData = async () => {
@@ -59,6 +61,32 @@ export const ImageManagementPage: FC = () => {
       console.error('Error fetching data:', error);
     }
   };
+
+  const fetchData_2 = async () => {
+    const responseFolder = await window.electron.getFolderTree(1);
+    const responseImages = await window.electron.getImagesByFolder(2);
+    console.log(responseFolder?.data);
+
+
+    const formatImages = responseImages?.data?.map((img: any) => ({
+      ...img,
+      name: getFilenameWithoutExtension(img?.filename),
+      version: 'v1.0',
+      caption: '',
+      quality: 0,
+      folders: ['Unassigned'],
+      date_added: img?.data?.last_modified,
+    }));
+    const newRootData = {
+      ...responseFolder?.data,
+      // children: formatImages,
+    };
+    console.log(newRootData)
+    setRootData(newRootData);
+    setSelectedNode(newRootData?.children[0]);
+    setImagesNode(formatImages);
+    // handleSetImages(newRootData?.children[0]);
+  }
 
   const handleSetImages = (currentNode: any) => {
     const filterImages = filterNodeType(currentNode, 'image');
@@ -273,31 +301,32 @@ export const ImageManagementPage: FC = () => {
 
   useEffect(() => {
     fetchRootFolder();
-    fetchData();
+    // fetchData();
+    fetchData_2();
   }, []);
 
-  useEffect(() => {
-    if (selectedTab === 'Folders') {
-      setSelectedNode(null);
-      setImagesNode([]);
-    } else {
-      if (!!rootData?.children?.length) {
-        const currentNode = rootData?.children[0];
-        handleSetImages(currentNode);
-        setSelectedNode(currentNode);
-      }
-    }
-  }, [selectedTab]);
+  // useEffect(() => {
+  //   if (selectedTab === 'Folders') {
+  //     setSelectedNode(null);
+  //     setImagesNode([]);
+  //   } else {
+  //     if (!!rootData?.children?.length) {
+  //       const currentNode = rootData?.children[0];
+  //       handleSetImages(currentNode);
+  //       setSelectedNode(currentNode);
+  //     }
+  //   }
+  // }, [selectedTab]);
 
   return (
     <div className="p-5">
       <div className="flex items-center justify-between">
         <Tabs tabs={['Images', 'Grid', 'Folders']} currentTab={selectedTab} onSelect={setSelectedTab} />
         <div className="flex space-x-2">
-          <ButtonPrimary onClick={handleSelectFolder}>
+          {/* <ButtonPrimary onClick={handleSelectFolder}>
             <FaPlus />
             <span>Add Root Folder</span>
-          </ButtonPrimary>
+          </ButtonPrimary> */}
           <ButtonPrimary onClick={handleSelectFiles}>
             <FaPlus />
             <span>Add Images</span>

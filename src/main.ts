@@ -18,6 +18,7 @@ import {
 } from './utils/common'
 import { selectRootFolder, scanRootFolder } from './utils/fileSystemScaner';
 import { TreeNode } from './models';
+import registerHandlers from './main/ipc-handlers';
 
 const envPath = path.resolve(__dirname, `.env.${process.env.NODE_ENV || "development"}`);
 let mainWindow: BrowserWindow;
@@ -52,6 +53,7 @@ app.on('ready', async () => {
     console.log('Initializing database...');
     DatabaseManager.initialize();
     console.log('Database initialized successfully');
+    registerHandlers();
     createWindow();
   } catch (error) {
     console.error("Error create table db:", error);

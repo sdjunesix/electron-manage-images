@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { ButtonPrimary, Input, Label, Tabs } from '@components';
 
 export const SettingsPage: FC = () => {
@@ -6,6 +6,49 @@ export const SettingsPage: FC = () => {
   const [inputPathFolder, setInputPathFolder] = useState<string>('');
   const [inputApiKeyOpenAI, setInputApiKeyOpenAI] = useState<string>('');
   const [inputApiKeyClaude, setInputApiKeyClaude] = useState<string>('');
+
+  const fetchRootFolder = async () => {
+    const rootFoldersResult = await window.electron.getRootFolders();
+    if (rootFoldersResult.data && rootFoldersResult.data?.[0]?.full_path) {
+      setInputPathFolder(rootFoldersResult.data?.[0]?.full_path);
+    }
+  }
+
+  const handleSetRootFolder = async () => {
+    try {
+      const rootFoldersResult = await window.electron.getRootFolders();
+
+      if (!rootFoldersResult.success) {
+        console.log('Không thể lấy danh sách thư mục gốc');
+        return;
+      }
+
+      // Kiểm tra xem có phải là thư mục không (ở UI)
+      const isDirectory = await window.electron.isDirectory(inputPathFolder);
+      if (!isDirectory) {
+        console.log('Đường dẫn phải là một thư mục, không phải file');
+        return;
+      }
+
+      const rootFolders = rootFoldersResult.data;
+      const existingRootFolder = rootFolders.find((folder: any) => folder.full_path === inputPathFolder);
+
+      let result;
+      if (existingRootFolder) {
+        result = await window.electron.reScanRootFolder(inputPathFolder);
+      } else {
+        result = await window.electron.setRootFolder(inputPathFolder);
+      }
+
+      console.log(result);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchRootFolder();
+  }, []);
 
   return (
     <div className="p-5 space-y-4">
@@ -17,7 +60,9 @@ export const SettingsPage: FC = () => {
             <div className="w-1/2">
               <Input placeholder="Add path here" value={inputPathFolder} onChange={(e) => setInputPathFolder(e.target.value)} />
             </div>
-            <ButtonPrimary>Save Path</ButtonPrimary>
+            <ButtonPrimary disabled={!inputPathFolder} onClick={handleSetRootFolder}>
+              Save Path
+            </ButtonPrimary>
           </div>
           <div className="text-muted_foreground">
             <p>The app will:</p>
@@ -39,9 +84,15 @@ export const SettingsPage: FC = () => {
             </div>
             <div>
               <Label>API Key</Label>
-              <Input placeholder="Enter your OpenAI key" value={inputApiKeyOpenAI} onChange={(e) => setInputApiKeyOpenAI(e.target.value)} />
+              <Input
+                placeholder="Enter your OpenAI key"
+                value={inputApiKeyOpenAI}
+                onChange={(e) => setInputApiKeyOpenAI(e.target.value)}
+              />
             </div>
-            <ButtonPrimary className="w-full">Save OpenAI Configuration</ButtonPrimary>
+            <ButtonPrimary disabled className="w-full">
+              Save OpenAI Configuration
+            </ButtonPrimary>
           </div>
           <div className="border border-line rounded-lg p-4 w-2/3 space-y-4">
             <div className="flex justify-between items-center space-x-2">
@@ -50,9 +101,15 @@ export const SettingsPage: FC = () => {
             </div>
             <div>
               <Label>API Key</Label>
-              <Input placeholder="Enter your Claude key" value={inputApiKeyClaude} onChange={(e) => setInputApiKeyClaude(e.target.value)} />
+              <Input
+                placeholder="Enter your Claude key"
+                value={inputApiKeyClaude}
+                onChange={(e) => setInputApiKeyClaude(e.target.value)}
+              />
             </div>
-            <ButtonPrimary className="w-full">Save Claude Configuration</ButtonPrimary>
+            <ButtonPrimary disabled className="w-full">
+              Save Claude Configuration
+            </ButtonPrimary>
           </div>
         </div>
       )}

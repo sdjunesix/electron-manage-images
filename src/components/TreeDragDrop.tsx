@@ -183,8 +183,6 @@ export const TreeItem: FC<TreeItemProps> = ({
     setIsDragOver(false);
   };
 
-  if (type !== 'folder') return null;
-
   return (
     <li
       draggable={type === 'folder' && name !== 'Unassigned'}
@@ -279,7 +277,7 @@ export const TreeItem: FC<TreeItemProps> = ({
             </span>
           </div>
         )}
-        <p className='px-1.5 py-0.5 text-xs rounded bg-muted text-muted_foreground'>{children.filter(el => el?.type === 'image')?.length}</p>
+        <p className='px-1.5 py-0.5 text-xs rounded bg-muted text-muted_foreground'>{children?.length}</p>
       </div>
       {children && expandedNodes[id] && (
         <ul>

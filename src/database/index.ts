@@ -17,7 +17,7 @@ class DatabaseManager {
     fs.ensureDirSync(path.dirname(this.dbPath));
 
     this.db = new sqlite3(this.dbPath, {
-      verbose: process.env.NODE_ENV === 'development' ? console.log : undefined,
+      verbose: undefined, // process.env.NODE_ENV === 'development' ? console.log : undefined,
     });
 
     // enable foreign keys
@@ -47,6 +47,8 @@ class DatabaseManager {
         parent_folder_id INTEGER,
         root_folder_id INTEGER,
         is_root BOOLEAN DEFAULT 0,
+        is_default BOOLEAN DEFAULT 0,
+        is_virtual BOOLEAN DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         last_scanned DATETIME,
         FOREIGN KEY (parent_folder_id) REFERENCES folders(id),
@@ -148,4 +150,5 @@ class DatabaseManager {
   }
 }
 
+export const db = DatabaseManager.getInstance().getDatabase();
 export default DatabaseManager.getInstance();

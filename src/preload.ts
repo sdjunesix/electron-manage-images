@@ -14,11 +14,29 @@ contextBridge.exposeInMainWorld('electron', {
   updateTreeData: (id: number, data: string) => ipcRenderer.invoke('update-tree-data', id, data),
   getRoot: () => ipcRenderer.invoke('get-root'),
   getImages: () => ipcRenderer.invoke('get-images'),
-  getImageById: (imageId: string) => ipcRenderer.invoke('get-image-by-id', imageId),
+  // getImageById: (imageId: string) => ipcRenderer.invoke('get-image-by-id', imageId),
   getFolders: () => ipcRenderer.invoke('get-folders'),
   updateImageQuality: (obj: any, targetId: string, newObject: any) => ipcRenderer.invoke('update-image-quality', obj, targetId, newObject),
   updateImageCaption: (obj: any, targetId: string, newObject: any) => ipcRenderer.invoke('update-image-caption', obj, targetId, newObject),
   updateImageVersion: (obj: any, targetId: string, newObject: any) => ipcRenderer.invoke('update-image-version', obj, targetId, newObject),
 
   getImagesFromFolder: (folderPath: string) => ipcRenderer.invoke('get-images-from-folder'),
+
+  setRootFolder: (folderPath: string) => ipcRenderer.invoke('set-root-folder', folderPath),
+  reScanRootFolder: (folderPath: string) => ipcRenderer.invoke('re-scan-root-folder', folderPath),
+  isDirectory: (path: string) => ipcRenderer.invoke('is-directory', path),
+  getRootFolders: () => ipcRenderer.invoke('get-root-folders'),
+  getFolderById: (folderId: number) => ipcRenderer.invoke('get-folder-by-id', folderId),
+  getFolderByPath: (folderPath: string) => ipcRenderer.invoke('get-folder-by-path', folderPath),
+  getChildFolders: (folderId: number) => ipcRenderer.invoke('get-child-folders', folderId),
+  getDirectSubfolders: (rootFolderId: number) => ipcRenderer.invoke('get-direct-subfolders', rootFolderId),
+  getAllFoldersByRoot: (rootFolderId: number) => ipcRenderer.invoke('get-all-folders-by-root', rootFolderId),
+  getFolderTree: (rootFolderId: number) => ipcRenderer.invoke('get-folder-tree', rootFolderId),
+
+  getImagesByFolder: (folderId: number) => ipcRenderer.invoke('get-images-by-folder', folderId),
+  getImageById: (imageId: number) => ipcRenderer.invoke('get-image-by-id', imageId),
+  getImageCaption: (imageId: number) => ipcRenderer.invoke('get-image-caption', imageId),
+  updateImageRating: (imageId: number, rating: number) => ipcRenderer.invoke('update-image-rating', imageId, rating),
+  moveImageToFolder: (imageId: number, targetFolderId: number) => ipcRenderer.invoke('move-image-to-folder', imageId, targetFolderId),
+  readImageFile: (imagePath: string) => ipcRenderer.invoke('read-image-file', imagePath)
 });

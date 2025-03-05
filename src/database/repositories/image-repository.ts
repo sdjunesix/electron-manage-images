@@ -1,6 +1,6 @@
-// src/database/repositories/ImageRepository.ts
-import DatabaseManager from '../index';
 import path from 'path';
+import fs from 'fs-extra';
+import { db } from '../index';
 
 interface ImageData {
   id?: number;
@@ -20,19 +20,17 @@ interface ImageData {
 }
 
 class ImageRepository {
-  private db = DatabaseManager.getDatabase();
-
   /**
    * Thêm hình ảnh mới hoặc cập nhật hình ảnh đã tồn tại
    */
   addOrUpdateImage(imageData: ImageData): number {
-    const stmt = this.db.prepare(`
+    const stmt = db.prepare(`
       INSERT OR REPLACE INTO images 
       (filename, folder_id, original_path, current_path, file_size, file_hash, 
        mime_type, width, height, creation_date, last_modified, is_processed, rating)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    
+
     const result = stmt.run(
       imageData.filename,
       imageData.folder_id,
@@ -48,7 +46,7 @@ class ImageRepository {
       imageData.is_processed ? 1 : 0,
       imageData.rating || null
     );
-    
+
     return result.lastInsertRowid as number;
   }
 
@@ -56,7 +54,7 @@ class ImageRepository {
    * Lấy hình ảnh theo đường dẫn
    */
   getByPath(imagePath: string): ImageData | null {
-    const stmt = this.db.prepare('SELECT * FROM images WHERE original_path = ? OR current_path = ?');
+    const stmt = db.prepare('SELECT * FROM images WHERE original_path = ? OR current_path = ?');
     return stmt.get(imagePath, imagePath) as ImageData | null;
   }
 
@@ -64,7 +62,7 @@ class ImageRepository {
    * Lấy hình ảnh theo ID
    */
   getById(imageId: number): ImageData | null {
-    const stmt = this.db.prepare('SELECT * FROM images WHERE id = ?');
+    const stmt = db.prepare('SELECT * FROM images WHERE id = ?');
     return stmt.get(imageId) as ImageData | null;
   }
 
@@ -72,7 +70,7 @@ class ImageRepository {
    * Lấy tất cả hình ảnh trong một thư mục
    */
   getByFolderId(folderId: number): ImageData[] {
-    const stmt = this.db.prepare('SELECT * FROM images WHERE folder_id = ?');
+    const stmt = db.prepare('SELECT * FROM images WHERE folder_id = ?');
     return stmt.all(folderId) as ImageData[];
   }
 
@@ -80,13 +78,13 @@ class ImageRepository {
    * Cập nhật đường dẫn hình ảnh khi di chuyển
    */
   updateImagePath(imageId: number, newPath: string): void {
-    const stmt = this.db.prepare(`
+    const stmt = db.prepare(`
       UPDATE images 
       SET current_path = ?, 
           filename = ? 
       WHERE id = ?
     `);
-    
+
     stmt.run(newPath, path.basename(newPath), imageId);
   }
 
@@ -94,7 +92,7 @@ class ImageRepository {
    * Đánh dấu hình ảnh đã được xử lý
    */
   markAsProcessed(imageId: number): void {
-    const stmt = this.db.prepare('UPDATE images SET is_processed = 1 WHERE id = ?');
+    const stmt = db.prepare('UPDATE images SET is_processed = 1 WHERE id = ?');
     stmt.run(imageId);
   }
 
@@ -105,8 +103,8 @@ class ImageRepository {
     if (rating < 0 || rating > 5) {
       throw new Error('Rating must be between 0 and 5');
     }
-    
-    const stmt = this.db.prepare('UPDATE images SET rating = ? WHERE id = ?');
+
+    const stmt = db.prepare('UPDATE images SET rating = ? WHERE id = ?');
     stmt.run(rating, imageId);
   }
 
@@ -114,7 +112,7 @@ class ImageRepository {
    * Xóa hình ảnh khỏi database
    */
   deleteImage(imageId: number): void {
-    const stmt = this.db.prepare('DELETE FROM images WHERE id = ?');
+    const stmt = db.prepare('DELETE FROM images WHERE id = ?');
     stmt.run(imageId);
   }
 
@@ -124,18 +122,111 @@ class ImageRepository {
   updateImageMetadata(imageId: number, metadata: Partial<ImageData>): void {
     // Xây dựng câu lệnh UPDATE động dựa trên các trường có giá trị
     const updateFields = Object.keys(metadata)
-      .filter(key => metadata[key as keyof Partial<ImageData>] !== undefined)
-      .map(key => `${key} = ?`)
+      .filter((key) => metadata[key as keyof Partial<ImageData>] !== undefined)
+      .map((key) => `${key} = ?`)
       .join(', ');
-    
+
     if (!updateFields) return;
-    
+
     const values = Object.keys(metadata)
-      .filter(key => metadata[key as keyof Partial<ImageData>] !== undefined)
-      .map(key => metadata[key as keyof Partial<ImageData>]);
-    
-    const stmt = this.db.prepare(`UPDATE images SET ${updateFields} WHERE id = ?`);
+      .filter((key) => metadata[key as keyof Partial<ImageData>] !== undefined)
+      .map((key) => metadata[key as keyof Partial<ImageData>]);
+
+    const stmt = db.prepare(`UPDATE images SET ${updateFields} WHERE id = ?`);
     stmt.run(...values, imageId);
+  }
+
+  // Trong ImageRepository.ts
+  /**
+   * Di chuyển hình ảnh sang thư mục khác
+   */
+  moveImageToFolder(imageId: number, targetFolderId: number, newPath: string): void {
+    try {
+      // Cập nhật thông tin trong database
+      const stmt = db.prepare(`
+      UPDATE images 
+      SET folder_id = ?, 
+          current_path = ?,
+          filename = ?
+      WHERE id = ?
+    `);
+
+      const filename = path.basename(newPath);
+      stmt.run(targetFolderId, newPath, filename, imageId);
+
+      // Thêm vào activity log
+      const logStmt = db.prepare(`
+      INSERT INTO activity_logs 
+      (action_type, entity_type, entity_id, new_path)
+      VALUES (?, ?, ?, ?)
+    `);
+
+      logStmt.run('move_image', 'image', imageId, newPath);
+    } catch (error) {
+      console.error('Error moving image to folder:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Di chuyển hình ảnh sang thư mục khác (cả trong database và trên hệ thống file)
+   */
+  moveImageToFolderSyncSystem(imageId: number, targetFolderId: number, newPath: string, movePhysicalFile: boolean = false): void {
+    try {
+      // Lấy thông tin hiện tại của ảnh
+      const image = this.getById(imageId);
+      if (!image) {
+        throw new Error(`Không tìm thấy hình ảnh với ID: ${imageId}`);
+      }
+
+      const oldPath = image.original_path;
+
+      // Di chuyển file vật lý nếu yêu cầu
+      if (movePhysicalFile) {
+        // Đảm bảo thư mục đích tồn tại
+        fs.ensureDirSync(path.dirname(newPath));
+
+        // Di chuyển file
+        fs.moveSync(oldPath, newPath, { overwrite: false });
+
+        // Cập nhật cả original_path và current_path
+        const stmt = db.prepare(`
+        UPDATE images 
+        SET folder_id = ?, 
+            original_path = ?,
+            current_path = ?,
+            filename = ?
+        WHERE id = ?
+      `);
+
+        const filename = path.basename(newPath);
+        stmt.run(targetFolderId, newPath, newPath, filename, imageId);
+      } else {
+        // Chỉ cập nhật trong database
+        const stmt = db.prepare(`
+        UPDATE images 
+        SET folder_id = ?, 
+            current_path = ?,
+            filename = ?
+        WHERE id = ?
+      `);
+
+        const filename = path.basename(newPath);
+        stmt.run(targetFolderId, newPath, filename, imageId);
+      }
+
+      // Thêm vào activity log
+      const logStmt = db.prepare(`
+      INSERT INTO activity_logs 
+      (action_type, entity_type, entity_id, old_path, new_path)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+
+      logStmt.run('move_image', 'image', imageId, oldPath, newPath);
+    } catch (error) {
+      console.error('Error moving image to folder:', error);
+      throw error;
+    }
   }
 }
 
